@@ -440,3 +440,216 @@ WARNINGS AND METHODOLOGICAL CAVEATS
 ==============================================================================
 END OF REPORT
 ==============================================================================
+
+==============================================================================
+V2 CHANGELOG - LITERACY INDICATOR FIX
+==============================================================================
+Generated             : 2026-09-19 15:37:10
+
+Change:
+  adult_literacy_rate was confirmed inverted (corr with
+  mean_edu_years_adults = -0.50; it behaves as an illiteracy rate).
+  It is now carried as adult_illiteracy_rate with values UNCHANGED and
+  FORWARD-normalized, (x - min)/(max - min), instead of reverse
+  min-max. It stays in Adaptive Capacity; the dimension still has 7
+  indicators. Column adult_literacy_rate_norm is replaced by
+  adult_illiteracy_rate_norm. No other indicator was touched. The flood
+  collinearity (C3) is unchanged and remains an accepted limitation.
+
+Recomputed: exposure_score, sensitivity_score,
+adaptive_capacity_vulnerability_score, LVI. Exposure and Sensitivity
+are numerically identical to v1 (no input to them changed).
+
+  V2 FIX: adult_literacy_rate -> adult_illiteracy_rate (values unchanged, direction flipped to forward min-max). corr with mean_edu_years_adults = -0.5048, consistent with an illiteracy measure.
+
+Old (v1) vs new (v2) score distributions:
+score                                          v1 mean    v1 std   v2 mean    v2 std
+exposure_score                                  0.4521    0.1489    0.4521    0.1489
+sensitivity_score                               0.3008    0.0594    0.3008    0.0594
+adaptive_capacity_vulnerability_score           0.7333    0.1205    0.6381    0.1390
+LVI                                             0.4954    0.0615    0.4636    0.0646
+
+Household-level change in LVI (v2 - v1), same row order:
+  mean change            : -0.0317
+  mean absolute change   : 0.0375
+  max  absolute change   : 0.0476
+  Pearson  corr(v1, v2)  : 0.9149
+  Spearman corr(v1, v2)  : 0.9127
+
+Row with missing hhid2 (0-based row index 0), retained and scored.
+Identifying columns for manual ID recovery:
+  row 0: a10=1.0, a11=1.0, a13=1.0, a14=1.0, a15=1.0, a23=3.0
+
+Validation checks 4-9 re-run on the v2 scores (checks 1, 2, 3 and 10
+are unaffected by the change and were not re-run):
+
+------------------------------------------------------------------------------
+CHECK 4 | NORMALIZED INDICATOR DISTRIBUTIONS
+------------------------------------------------------------------------------
+indicator                                   min      max     mean      std
+flood_affected                           0.0000   1.0000   0.5706   0.4950
+flood_depth_ft_mean                      0.0000   1.0000   0.0624   0.0894
+seasonal_wind_avg                        0.0000   1.0000   0.6177   0.1303
+seasonal_evapotranspiration_avg          0.0000   1.0000   0.5575   0.1774
+agricultural_occupation_dependence       0.0000   1.0000   0.0745   0.1012
+dependency_ratio                         0.0000   1.0000   0.1430   0.1346
+hh_size                                  0.0000   1.0000   0.1840   0.1025
+meals_per_person_week                    0.0000   1.0000   0.8015   0.0556
+income_per_capita_monthly                0.0000   1.0000   0.7990   0.1884
+mean_edu_years_adults                    0.0000   1.0000   0.7369   0.1820
+adult_illiteracy_rate                    0.0000   1.0000   0.1667   0.2749
+livelihood_diversity                     0.0000   1.0000   0.8189   0.1579
+any_nonfarm_agri_work                    0.0000   1.0000   0.7822   0.4128
+land_cultivable_decimal                  0.0000   1.0000   0.8672   0.1880
+has_current_loan_binary                  0.0000   1.0000   0.2960   0.4565
+
+Raw min/max actually used for each rescaling:
+indicator                                    raw min       raw max
+flood_affected                                0.0000        1.0000
+flood_depth_ft_mean                           0.0000       21.0000
+seasonal_wind_avg                             1.0902        3.8285
+seasonal_evapotranspiration_avg               2.8015        4.7719
+agricultural_occupation_dependence            0.0000        6.0000
+dependency_ratio                              0.0000        6.0000
+hh_size                                       1.0000       18.0000
+meals_per_person_week                         0.0000       38.0000
+income_per_capita_monthly                     0.0000    12500.0000
+mean_edu_years_adults                         0.0000       17.0000
+adult_illiteracy_rate                         0.0000        1.0000
+livelihood_diversity                          0.0000        4.0000
+any_nonfarm_agri_work                         0.0000        1.0000
+land_cultivable_decimal                       0.0000      495.0000
+has_current_loan_binary                       0.0000        1.0000
+
+------------------------------------------------------------------------------
+CHECK 5 | DIMENSION SCORES AND COMPOSITE LVI
+------------------------------------------------------------------------------
+score                                            min     max    mean     std      n
+exposure_score                                0.1572  0.8482  0.4521  0.1489   5605
+sensitivity_score                             0.0000  0.7176  0.3008  0.0594   5605
+adaptive_capacity_vulnerability_score         0.1303  1.0000  0.6381  0.1390   5605
+LVI                                           0.2490  0.6576  0.4636  0.0646   5605
+
+LVI percentiles:
+  p1   : 0.3149
+  p5   : 0.3603
+  p10  : 0.3810
+  p25  : 0.4168
+  p50  : 0.4640
+  p75  : 0.5086
+  p90  : 0.5479
+  p95  : 0.5710
+  p99  : 0.6068
+
+Correlation between dimension scores and LVI (Pearson):
+                                              exposure_sco  sensitivity_  adaptive_cap           LVI
+exposure_score                                      1.0000        0.1693       -0.1890        0.6843
+sensitivity_score                                   0.1693        1.0000       -0.1584        0.3227
+adaptive_capacity_vulnerability_score              -0.1890       -0.1584        1.0000        0.5236
+LVI                                                 0.6843        0.3227        0.5236        1.0000
+
+------------------------------------------------------------------------------
+CHECK 6 | ALL VALID SCORES WITHIN [0, 1]
+------------------------------------------------------------------------------
+flood_affected_norm                           [0.000000, 1.000000]  PASS
+flood_depth_ft_mean_norm                      [0.000000, 1.000000]  PASS
+seasonal_wind_avg_norm                        [0.000000, 1.000000]  PASS
+seasonal_evapotranspiration_avg_norm          [0.000000, 1.000000]  PASS
+agricultural_occupation_dependence_norm       [0.000000, 1.000000]  PASS
+dependency_ratio_norm                         [0.000000, 1.000000]  PASS
+hh_size_norm                                  [0.000000, 1.000000]  PASS
+meals_per_person_week_norm                    [0.000000, 1.000000]  PASS
+income_per_capita_monthly_norm                [0.000000, 1.000000]  PASS
+mean_edu_years_adults_norm                    [0.000000, 1.000000]  PASS
+adult_illiteracy_rate_norm                    [0.000000, 1.000000]  PASS
+livelihood_diversity_norm                     [0.000000, 1.000000]  PASS
+any_nonfarm_agri_work_norm                    [0.000000, 1.000000]  PASS
+land_cultivable_decimal_norm                  [0.000000, 1.000000]  PASS
+has_current_loan_binary_norm                  [0.000000, 1.000000]  PASS
+exposure_score                                [0.157235, 0.848203]  PASS
+sensitivity_score                             [0.000000, 0.717634]  PASS
+adaptive_capacity_vulnerability_score         [0.130252, 1.000000]  PASS
+LVI                                           [0.249004, 0.657585]  PASS
+
+Overall range check: PASS
+
+------------------------------------------------------------------------------
+CHECK 7 | DIRECTION - HIGHER ADAPTIVE CAPACITY => LOWER VULNERABILITY
+------------------------------------------------------------------------------
+For every reverse-normalized indicator the raw value must correlate
+-1.00 with its own normalized value, and negatively with the Adaptive
+Capacity vulnerability score and the composite LVI.
+
+indicator                               r(raw,norm)   r(raw,AC)  r(raw,LVI)  verdict
+meals_per_person_week                       -1.0000     -0.0032     -0.1205  PASS
+income_per_capita_monthly                   -1.0000     -0.4297     -0.3657  PASS
+mean_edu_years_adults                       -1.0000     -0.4472     -0.2624  PASS
+livelihood_diversity                        -1.0000     -0.4268     -0.0884  PASS
+any_nonfarm_agri_work                       -1.0000     -0.5995     -0.3351  PASS
+land_cultivable_decimal                     -1.0000     -0.4784      0.0078  PASS
+has_current_loan_binary                     -1.0000     -0.5865     -0.3385  PASS
+
+Forward-normalized indicators (higher raw = higher vulnerability):
+indicator                               r(raw,norm)
+flood_affected                               1.0000  PASS
+flood_depth_ft_mean                          1.0000  PASS
+seasonal_wind_avg                            1.0000  PASS
+seasonal_evapotranspiration_avg              1.0000  PASS
+agricultural_occupation_dependence           1.0000  PASS
+dependency_ratio                             1.0000  PASS
+hh_size                                      1.0000  PASS
+adult_illiteracy_rate                        1.0000  PASS
+
+Overall direction check: PASS
+
+NOTE on adult_illiteracy_rate (v2): the inverted adult_literacy_rate is
+now carried as an illiteracy rate and FORWARD-normalized, so it sits in
+the forward table above. Its raw value should correlate POSITIVELY with
+the Adaptive Capacity vulnerability score and the LVI:
+  r(adult_illiteracy_rate, AC score) = 0.5029
+  r(adult_illiteracy_rate, LVI)      = 0.3185
+  r(adult_illiteracy_rate, mean_edu_years_adults) = -0.5048
+
+------------------------------------------------------------------------------
+CHECK 8 | CONSTANT OR LOW-VARIATION INDICATORS
+------------------------------------------------------------------------------
+indicator                               n_unique       raw std   norm std  status
+flood_affected                                 2        0.4950     0.4950  ok
+flood_depth_ft_mean                          365        1.8774     0.0894  ok
+seasonal_wind_avg                             39        0.3568     0.1303  ok
+seasonal_evapotranspiration_avg               39        0.3495     0.1774  ok
+agricultural_occupation_dependence             7        0.6071     0.1012  ok
+dependency_ratio                              38        0.8077     0.1346  ok
+hh_size                                       17        1.7419     0.1025  ok
+meals_per_person_week                        228        2.1113     0.0556  ok
+income_per_capita_monthly                   2106     2355.4037     0.1884  ok
+mean_edu_years_adults                        185        3.0932     0.1820  ok
+adult_illiteracy_rate                         19        0.2749     0.2749  ok
+livelihood_diversity                           5        0.6315     0.1579  ok
+any_nonfarm_agri_work                          2        0.4128     0.4128  ok
+land_cultivable_decimal                      533       93.0584     0.1880  ok
+has_current_loan_binary                        2        0.4565     0.4565  ok
+
+Constant indicators: none
+Low-variation (normalized std < 0.05): none
+No second winsorization or outlier capping was applied: the input is
+already cleaned and winsorized, so re-capping would compound the
+treatment. Normalization uses the observed min/max as they stand.
+
+------------------------------------------------------------------------------
+CHECK 9 | HOUSEHOLDS WITH INCOMPLETE DIMENSION SCORES OR LVI
+------------------------------------------------------------------------------
+Exposure (expects 4 indicators):
+    4 indicator(s) used : 5605 household(s)
+Sensitivity (expects 4 indicators):
+    4 indicator(s) used : 5605 household(s)
+Adaptive Capacity (expects 7 indicators):
+    7 indicator(s) used : 5605 household(s)
+
+Households with a complete LVI : 5605
+Households with LVI = NaN      : 0
+Completeness: PASS - every household fully scored
+
+==============================================================================
+END OF V2 CHANGELOG
+==============================================================================

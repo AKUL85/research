@@ -1,6 +1,6 @@
 # Stage 1 - Livelihood Vulnerability Index (LVI) construction
 
-BIHS Round 3 | Generated 2026-09-18 | n = 5605 households
+BIHS Round 3 | Generated 2026-09-19 | n = 5605 households
 
 ## 1. Approach
 
@@ -19,7 +19,8 @@ I = (x - min(x)) / (max(x) - min(x))
 ```
 
 For an indicator where a higher raw value means **lower** vulnerability
-(all Adaptive Capacity indicators, plus `meals_per_person_week`):
+(all Adaptive Capacity indicators except `adult_illiteracy_rate`, plus
+`meals_per_person_week`):
 
 ```
 I = (max(x) - x) / (max(x) - min(x))
@@ -36,7 +37,7 @@ No second winsorization is applied - the input is already cleaned.
 ```
 D_exposure    = mean(4 normalized Exposure indicators)
 D_sensitivity = mean(4 normalized Sensitivity indicators)
-D_adaptive    = mean(7 reverse-normalized Adaptive Capacity indicators)
+D_adaptive    = mean(7 normalized Adaptive Capacity indicators)
 ```
 
 Written as `exposure_score`, `sensitivity_score` and
@@ -80,7 +81,7 @@ into Low/Medium/High at this stage.
 |---|---|---|---|---|
 | `income_per_capita_monthly` | higher = less vulnerable (reversed) | `(max - x) / (max - min)` | 0.0000 | 12500.0000 |
 | `mean_edu_years_adults` | higher = less vulnerable (reversed) | `(max - x) / (max - min)` | 0.0000 | 17.0000 |
-| `adult_literacy_rate` | higher = less vulnerable (reversed) | `(max - x) / (max - min)` | 0.0000 | 1.0000 |
+| `adult_illiteracy_rate` | higher = more vulnerable | `(x - min) / (max - min)` | 0.0000 | 1.0000 |
 | `livelihood_diversity` | higher = less vulnerable (reversed) | `(max - x) / (max - min)` | 0.0000 | 4.0000 |
 | `any_nonfarm_agri_work` | higher = less vulnerable (reversed) | `(max - x) / (max - min)` | 0.0000 | 1.0000 |
 | `land_cultivable_decimal` | higher = less vulnerable (reversed) | `(max - x) / (max - min)` | 0.0000 | 495.0000 |
@@ -94,14 +95,16 @@ meals_per_person_week              = mealdays_total_7d / hh_size
 seasonal_wind_avg                  = mean(clim_{aus,aman,boro}_wind_avg)
 seasonal_evapotranspiration_avg    = mean(clim_{aus,aman,boro}_evapotrans_avg)
 has_current_loan_binary            = 1 if has_current_loan == 1 else 0
+adult_illiteracy_rate              = adult_literacy_rate  (renamed, v2)
 ```
 
 ## 7. Caveats carried into the paper
 
-1. **`adult_literacy_rate` appears inverted.** It correlates **negatively**
-   with adult schooling (r = -0.50) and with income. Included unchanged as
-   specified, but this needs resolution before publication - see
-   `lvi_validation_report.txt`, caveat C1.
+1. **`adult_literacy_rate` is inverted (resolved in v2).** It correlates
+   **negatively** with adult schooling (r = -0.50) and with income, i.e. it
+   measures illiteracy. Since v2 it enters the index as
+   `adult_illiteracy_rate`, forward-normalized (higher = more vulnerable).
+   See `lvi_validation_report.txt`, caveat C1 and the v2 changelog.
 2. **`has_current_loan` was recoded** from the BIHS 1=Yes/2=No coding to a
    0/1 indicator. Without this the framework would have been inverted.
    Current borrowing proxies credit **access**, not debt burden.

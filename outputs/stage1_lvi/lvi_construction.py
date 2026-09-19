@@ -218,6 +218,27 @@ def build_indicators(df: pd.DataFrame, log: list[str]) -> tuple[pd.DataFrame, di
         f"{len(out)} households hold a current loan."
     )
 
+    # --- Adaptive capacity: literacy indicator, v2 fix ---------------------
+    # The cleaned adult_literacy_rate is inverted: it correlates -0.50 with
+    # mean_edu_years_adults and behaves as an ILLITERACY rate (see caveat C1 of
+    # the v1 report). v2 resolution (option b): carry the values unchanged under
+    # the name adult_illiteracy_rate and FORWARD-normalize them, so a higher
+    # value means more vulnerable. The raw column is left untouched in the
+    # output for traceability.
+    require_columns(df, ["adult_literacy_rate"], "adult_illiteracy_rate")
+    out["adult_illiteracy_rate"] = df["adult_literacy_rate"].astype("float64")
+    notes["adult_illiteracy_rate"] = (
+        "adult_literacy_rate carried over unchanged and renamed: the cleaned "
+        "variable is inverted (corr -0.50 with adult schooling) and measures "
+        "illiteracy. Forward-normalized: HIGHER = MORE vulnerable."
+    )
+    r_edu = out["adult_illiteracy_rate"].corr(df["mean_edu_years_adults"])
+    log.append(
+        "V2 FIX: adult_literacy_rate -> adult_illiteracy_rate (values unchanged, "
+        f"direction flipped to forward min-max). corr with mean_edu_years_adults "
+        f"= {r_edu:.4f}, consistent with an illiteracy measure."
+    )
+
     return out, notes
 
 
@@ -288,8 +309,9 @@ def indicator_framework() -> list[dict]:
     The finalized framework: 4 Exposure + 4 Sensitivity + 7 Adaptive Capacity.
 
     'direction' is the relationship between the RAW value and vulnerability.
-    Every Adaptive Capacity indicator is NEGATIVE, so after reverse
-    normalization a high *_norm value always means high vulnerability.
+    Every Adaptive Capacity indicator except adult_illiteracy_rate is NEGATIVE
+    (reverse-normalized); adult_illiteracy_rate is POSITIVE since v2. Either
+    way a high *_norm value always means high vulnerability.
     """
     return [
         # ---- Exposure (4) -------------------------------------------------
@@ -319,16 +341,17 @@ def indicator_framework() -> list[dict]:
              direction=NEGATIVE, constructed=True,
              description="Person-meal-days per member over 7 days; fewer = worse."),
 
-        # ---- Adaptive Capacity (7), all reverse-normalized -----------------
+        # ---- Adaptive Capacity (7), reverse-normalized except illiteracy ---
         dict(name="income_per_capita_monthly", dimension="Adaptive Capacity",
              direction=NEGATIVE, constructed=False,
              description="Monthly income per household member."),
         dict(name="mean_edu_years_adults", dimension="Adaptive Capacity",
              direction=NEGATIVE, constructed=False,
              description="Mean completed years of schooling among adults 15+."),
-        dict(name="adult_literacy_rate", dimension="Adaptive Capacity",
-             direction=NEGATIVE, constructed=False,
-             description="Share of adults 15+ recorded as literate. SEE CAVEATS."),
+        dict(name="adult_illiteracy_rate", dimension="Adaptive Capacity",
+             direction=POSITIVE, constructed=True,
+             description=("Share of adults 15+ recorded as illiterate (v2: the "
+                          "inverted adult_literacy_rate, forward-normalized).")),
         dict(name="livelihood_diversity", dimension="Adaptive Capacity",
              direction=NEGATIVE, constructed=False,
              description="Count of distinct livelihood activities."),
@@ -568,6 +591,61 @@ def build_validation_report(
     add("  - No household is dropped for missingness.")
     add("")
 
+    L.extend(checks_4_to_9(result, summary, framework))
+
+    # ---- 10. Climate constant within district ----------------------------
+    add("-" * 78)
+    add("CHECK 10 | CLIMATE INDICATORS CONSTANT WITHIN DISTRICTS")
+    add("-" * 78)
+    clim_cols = [WIND_TEMPLATE.format(season=s) for s in SEASONS
+                 if WIND_TEMPLATE.format(season=s) in raw_df.columns]
+    clim_cols += [EVAPO_TEMPLATE.format(season=s) for s in SEASONS
+                  if EVAPO_TEMPLATE.format(season=s) in raw_df.columns]
+    add("The cleaned dataset carries NO explicit district identifier column: no")
+    add("variable in the file partitions the climate series (the BIHS a10/a11/")
+    add("a13/a14/a15/a23 codes all mix multiple climate profiles). The check is")
+    add("therefore run against a district key reconstructed from the distinct")
+    add("combinations of the seasonal climate series themselves.")
+    add("")
+    profile = raw_df[clim_cols].round(9).astype(str).agg("|".join, axis=1)
+    n_profiles = int(profile.nunique())
+    add(f"Distinct climate profiles (reconstructed districts): {n_profiles}")
+    sizes = profile.value_counts()
+    add(f"Households per profile: min={int(sizes.min())}, "
+        f"median={int(sizes.median())}, max={int(sizes.max())}")
+    add("")
+    add("Per-column distinct values within each reconstructed district:")
+    clim_ok = True
+    for col in clim_cols + ["seasonal_wind_avg", "seasonal_evapotranspiration_avg"]:
+        series = raw_df[col] if col in raw_df.columns else result[col]
+        max_distinct = int(series.groupby(profile).nunique().max())
+        ok = max_distinct == 1
+        clim_ok &= ok
+        add(f"  {col:<40} max distinct = {max_distinct}  {'PASS' if ok else 'FAIL'}")
+    add("")
+    add(f"Climate constancy check: {'PASS' if clim_ok else 'FAIL'}")
+    add("Confirms the climate variables are district-level contextual data merged")
+    add("onto households, not household-specific weather measurements. Two")
+    add("households in the same district necessarily share identical exposure on")
+    add("these two indicators.")
+    add("")
+
+    L.extend(caveats_section(raw_df, result, summary, framework, prep_log,
+                             input_path, n_profiles))
+    return "\n".join(L)
+
+
+def checks_4_to_9(
+    result: pd.DataFrame, summary: pd.DataFrame, framework: list[dict]
+) -> list[str]:
+    """Checks 4-9: the checks that depend on normalization and scoring.
+
+    Kept separate so they can be re-run on their own (e.g. the v2 changelog)
+    without repeating checks 1-3 and 10, which do not depend on the scores.
+    """
+    L: list[str] = []
+    add = L.append
+
     # ---- 4. Normalized indicator distributions ---------------------------
     add("-" * 78)
     add("CHECK 4 | NORMALIZED INDICATOR DISTRIBUTIONS")
@@ -665,10 +743,15 @@ def build_validation_report(
     add("")
     add(f"Overall direction check: {'PASS' if direction_ok else 'REVIEW REQUIRED'}")
     add("")
-    add("NOTE on adult_literacy_rate: this indicator passes the mechanical")
-    add("direction check (it is reverse-normalized exactly as specified), but the")
-    add("underlying variable appears to be inverted in the cleaned data. See the")
-    add("CAVEATS section below - this is the single most important open issue.")
+    add("NOTE on adult_illiteracy_rate (v2): the inverted adult_literacy_rate is")
+    add("now carried as an illiteracy rate and FORWARD-normalized, so it sits in")
+    add("the forward table above. Its raw value should correlate POSITIVELY with")
+    add("the Adaptive Capacity vulnerability score and the LVI:")
+    ill = result["adult_illiteracy_rate"].astype("float64")
+    add(f"  r(adult_illiteracy_rate, AC score) = {_fmt(ill.corr(ac_score), 4)}")
+    add(f"  r(adult_illiteracy_rate, LVI)      = {_fmt(ill.corr(result['LVI']), 4)}")
+    add(f"  r(adult_illiteracy_rate, mean_edu_years_adults) = "
+        f"{_fmt(ill.corr(result['mean_edu_years_adults']), 4)}")
     add("")
 
     # ---- 8. Variation -----------------------------------------------------
@@ -719,43 +802,20 @@ def build_validation_report(
     add(f"Completeness: "
         f"{'PASS - every household fully scored' if n_lvi_missing == 0 else 'REVIEW'}")
     add("")
+    return L
 
-    # ---- 10. Climate constant within district ----------------------------
-    add("-" * 78)
-    add("CHECK 10 | CLIMATE INDICATORS CONSTANT WITHIN DISTRICTS")
-    add("-" * 78)
-    clim_cols = [WIND_TEMPLATE.format(season=s) for s in SEASONS
-                 if WIND_TEMPLATE.format(season=s) in raw_df.columns]
-    clim_cols += [EVAPO_TEMPLATE.format(season=s) for s in SEASONS
-                  if EVAPO_TEMPLATE.format(season=s) in raw_df.columns]
-    add("The cleaned dataset carries NO explicit district identifier column: no")
-    add("variable in the file partitions the climate series (the BIHS a10/a11/")
-    add("a13/a14/a15/a23 codes all mix multiple climate profiles). The check is")
-    add("therefore run against a district key reconstructed from the distinct")
-    add("combinations of the seasonal climate series themselves.")
-    add("")
-    profile = raw_df[clim_cols].round(9).astype(str).agg("|".join, axis=1)
-    n_profiles = int(profile.nunique())
-    add(f"Distinct climate profiles (reconstructed districts): {n_profiles}")
-    sizes = profile.value_counts()
-    add(f"Households per profile: min={int(sizes.min())}, "
-        f"median={int(sizes.median())}, max={int(sizes.max())}")
-    add("")
-    add("Per-column distinct values within each reconstructed district:")
-    clim_ok = True
-    for col in clim_cols + ["seasonal_wind_avg", "seasonal_evapotranspiration_avg"]:
-        series = raw_df[col] if col in raw_df.columns else result[col]
-        max_distinct = int(series.groupby(profile).nunique().max())
-        ok = max_distinct == 1
-        clim_ok &= ok
-        add(f"  {col:<40} max distinct = {max_distinct}  {'PASS' if ok else 'FAIL'}")
-    add("")
-    add(f"Climate constancy check: {'PASS' if clim_ok else 'FAIL'}")
-    add("Confirms the climate variables are district-level contextual data merged")
-    add("onto households, not household-specific weather measurements. Two")
-    add("households in the same district necessarily share identical exposure on")
-    add("these two indicators.")
-    add("")
+
+def caveats_section(
+    raw_df: pd.DataFrame,
+    result: pd.DataFrame,
+    summary: pd.DataFrame,
+    framework: list[dict],
+    prep_log: list[str],
+    input_path: Path,
+    n_profiles: int,
+) -> list[str]:
+    L: list[str] = []
+    add = L.append
 
     # ---- Preparation log --------------------------------------------------
     add("-" * 78)
@@ -770,73 +830,27 @@ def build_validation_report(
     add("WARNINGS AND METHODOLOGICAL CAVEATS")
     add("=" * 78)
     add("")
-    add("[C1] adult_literacy_rate APPEARS INVERTED - REQUIRES A DECISION")
+    add("[C1] adult_literacy_rate IS INVERTED - RESOLVED IN v2")
     add("-" * 78)
-    add("  The brief flagged this variable for zero-inflation (median 0, ~66% of")
-    add("  households at zero), which is confirmed: "
-        f"{100 * float((raw_df['adult_literacy_rate'] == 0).mean()):.1f}% are zero.")
-    add("  However the variable also appears to be measuring the OPPOSITE of")
-    add("  literacy. Evidence from the cleaned file:")
+    add("  The cleaned adult_literacy_rate measures the OPPOSITE of literacy.")
+    add("  Evidence from the cleaned file:")
     r_edu = raw_df["adult_literacy_rate"].corr(raw_df["mean_edu_years_adults"])
     r_max = raw_df["adult_literacy_rate"].corr(raw_df["max_edu_years"])
     r_inc = raw_df["adult_literacy_rate"].corr(raw_df["income_per_capita_monthly"])
     add(f"    - corr(adult_literacy_rate, mean_edu_years_adults) = {r_edu:.4f}")
     add(f"    - corr(adult_literacy_rate, max_edu_years)         = {r_max:.4f}")
     add(f"    - corr(adult_literacy_rate, income_per_capita)     = {r_inc:.4f}")
-    add("    - Mean adult schooling by literacy-rate band:")
-    bands = pd.cut(raw_df["adult_literacy_rate"], [-0.01, 0, 0.34, 0.67, 1.0])
-    band_means = raw_df.groupby(bands, observed=True)["mean_edu_years_adults"].agg(
-        ["mean", "size"])
-    for band, row in band_means.iterrows():
-        add(f"        literacy in {str(band):<14} -> {row['mean']:.2f} years "
-            f"(n={int(row['size'])})")
     add("    - adult_literacy_rate == n_literate_15plus / n_adults_15plus exactly,")
-    add("      so the inversion originates in n_literate_15plus.")
-    add("    - head_literate is a 4-category code (1,2,3,4), not a 1/2 yes-no:")
-    head_means = raw_df.groupby("head_literate")["head_edu_years"].agg(["mean", "size"])
-    for code, row in head_means.iterrows():
-        add(f"        head_literate={int(code)} -> mean head_edu_years "
-            f"{row['mean']:.2f} (n={int(row['size'])})")
-    add("      Codes 1 and 2 carry ~0 years of schooling while code 4 carries ~6.9,")
-    add("      so counting codes 1/2 as 'literate' would produce exactly this")
-    add("      inversion.")
-    add("  Households with MORE schooling currently record LOWER literacy. Read")
-    add("  literally, the variable behaves like an adult ILLITERACY rate.")
+    add("      so the inversion originates in n_literate_15plus (head_literate")
+    add("      codes 1/2 carry ~0 years of schooling, code 4 carries ~6.9).")
     add("")
-    add("  ACTION TAKEN: none. The indicator is included and reverse-normalized")
-    add("  exactly as the framework specifies. It has NOT been altered.")
-    add("")
-    add("  CONSEQUENCE IF LEFT AS IS: within Adaptive Capacity this indicator")
-    add("  pushes better-educated households towards HIGHER vulnerability,")
-    add("  partially offsetting mean_edu_years_adults, which points the other way.")
-    add("")
-    add("  DIAGNOSTIC (not written to any output column): recomputing the LVI with")
-    add("  the literacy indicator replaced by (1 - adult_literacy_rate) gives:")
-    lit_norm_fixed, _ = minmax_normalize(1 - raw_df["adult_literacy_rate"], NEGATIVE)
-    ac_cols = [f"{i['name']}_norm" for i in framework
-               if i["dimension"] == "Adaptive Capacity"]
-    ac_alt = result[ac_cols].copy()
-    ac_alt["adult_literacy_rate_norm"] = lit_norm_fixed.to_numpy()
-    ac_alt_score = ac_alt.mean(axis=1, skipna=True)
-    lvi_alt = (result["exposure_score"] + result["sensitivity_score"]
-               + ac_alt_score) / 3
-    add(f"    - mean LVI  as specified : {result['LVI'].mean():.4f}")
-    add(f"    - mean LVI  with fix     : {lvi_alt.mean():.4f}")
-    add(f"    - mean absolute change   : {(lvi_alt - result['LVI']).abs().mean():.4f}")
-    add(f"    - max  absolute change   : {(lvi_alt - result['LVI']).abs().max():.4f}")
-    add(f"    - Pearson  corr(LVI, LVI_fixed)  : {result['LVI'].corr(lvi_alt):.4f}")
-    add(f"    - Spearman corr(LVI, LVI_fixed)  : "
-        f"{spearman(result['LVI'], lvi_alt):.4f}")
-    add("")
-    add("  RECOMMENDED RESOLUTION (needs your approval before implementation):")
-    add("    (a) Re-derive n_literate_15plus from the raw BIHS literacy codes so")
-    add("        that literate = the schooling-bearing category, then rebuild the")
-    add("        indicator. This is the correct fix if the cleaning miscoded it.")
-    add("    (b) If re-derivation is not possible, keep the variable but rename it")
-    add("        adult_illiteracy_rate and FORWARD-normalize it (higher = more")
-    add("        vulnerable), which restores the intended direction.")
-    add("    (c) Drop it from Adaptive Capacity, leaving 6 indicators, on the")
-    add("        grounds that mean_edu_years_adults already captures human capital.")
+    add("  ACTION TAKEN (v2): the variable is carried over UNCHANGED under the")
+    add("  name adult_illiteracy_rate and FORWARD-normalized, (x - min)/(max - min),")
+    add("  so higher = more vulnerable. It remains one of the 7 Adaptive Capacity")
+    add("  indicators. The raw adult_literacy_rate column is kept in the output")
+    add("  for traceability but no longer feeds any score. This is resolution (b)")
+    add("  of the v1 report; re-deriving n_literate_15plus from the raw BIHS codes")
+    add("  (resolution a) remains the better fix if the raw roster is available.")
     add("")
     add("[C2] has_current_loan WAS RECODED - PLEASE CONFIRM")
     add("-" * 78)
@@ -980,7 +994,8 @@ def build_methodology_note(summary: pd.DataFrame, result: pd.DataFrame) -> str:
     add("```")
     add("")
     add("For an indicator where a higher raw value means **lower** vulnerability")
-    add("(all Adaptive Capacity indicators, plus `meals_per_person_week`):")
+    add("(all Adaptive Capacity indicators except `adult_illiteracy_rate`, plus")
+    add("`meals_per_person_week`):")
     add("")
     add("```")
     add("I = (max(x) - x) / (max(x) - min(x))")
@@ -997,7 +1012,7 @@ def build_methodology_note(summary: pd.DataFrame, result: pd.DataFrame) -> str:
     add("```")
     add("D_exposure    = mean(4 normalized Exposure indicators)")
     add("D_sensitivity = mean(4 normalized Sensitivity indicators)")
-    add("D_adaptive    = mean(7 reverse-normalized Adaptive Capacity indicators)")
+    add("D_adaptive    = mean(7 normalized Adaptive Capacity indicators)")
     add("```")
     add("")
     add("Written as `exposure_score`, `sensitivity_score` and")
@@ -1039,14 +1054,16 @@ def build_methodology_note(summary: pd.DataFrame, result: pd.DataFrame) -> str:
     add("seasonal_wind_avg                  = mean(clim_{aus,aman,boro}_wind_avg)")
     add("seasonal_evapotranspiration_avg    = mean(clim_{aus,aman,boro}_evapotrans_avg)")
     add("has_current_loan_binary            = 1 if has_current_loan == 1 else 0")
+    add("adult_illiteracy_rate              = adult_literacy_rate  (renamed, v2)")
     add("```")
     add("")
     add("## 7. Caveats carried into the paper")
     add("")
-    add("1. **`adult_literacy_rate` appears inverted.** It correlates **negatively**")
-    add("   with adult schooling (r = -0.50) and with income. Included unchanged as")
-    add("   specified, but this needs resolution before publication - see")
-    add("   `lvi_validation_report.txt`, caveat C1.")
+    add("1. **`adult_literacy_rate` is inverted (resolved in v2).** It correlates")
+    add("   **negatively** with adult schooling (r = -0.50) and with income, i.e. it")
+    add("   measures illiteracy. Since v2 it enters the index as")
+    add("   `adult_illiteracy_rate`, forward-normalized (higher = more vulnerable).")
+    add("   See `lvi_validation_report.txt`, caveat C1 and the v2 changelog.")
     add("2. **`has_current_loan` was recoded** from the BIHS 1=Yes/2=No coding to a")
     add("   0/1 indicator. Without this the framework would have been inverted.")
     add("   Current borrowing proxies credit **access**, not debt burden.")
@@ -1110,7 +1127,86 @@ def assemble_output(
     return out.loc[:, ~out.columns.duplicated()]
 
 
-def main() -> int:
+def build_v2_changelog(
+    result: pd.DataFrame,
+    summary: pd.DataFrame,
+    framework: list[dict],
+    old_scores: pd.DataFrame | None,
+    prep_log: list[str],
+) -> str:
+    """Short v2 changelog appended to the existing validation report."""
+    L: list[str] = []
+    add = L.append
+    add("")
+    add("")
+    add("=" * 78)
+    add("V2 CHANGELOG - LITERACY INDICATOR FIX")
+    add("=" * 78)
+    add(f"Generated             : {datetime.now():%Y-%m-%d %H:%M:%S}")
+    add("")
+    add("Change:")
+    add("  adult_literacy_rate was confirmed inverted (corr with")
+    add("  mean_edu_years_adults = -0.50; it behaves as an illiteracy rate).")
+    add("  It is now carried as adult_illiteracy_rate with values UNCHANGED and")
+    add("  FORWARD-normalized, (x - min)/(max - min), instead of reverse")
+    add("  min-max. It stays in Adaptive Capacity; the dimension still has 7")
+    add("  indicators. Column adult_literacy_rate_norm is replaced by")
+    add("  adult_illiteracy_rate_norm. No other indicator was touched. The flood")
+    add("  collinearity (C3) is unchanged and remains an accepted limitation.")
+    add("")
+    add("Recomputed: exposure_score, sensitivity_score,")
+    add("adaptive_capacity_vulnerability_score, LVI. Exposure and Sensitivity")
+    add("are numerically identical to v1 (no input to them changed).")
+    add("")
+    for line in prep_log:
+        if line.startswith("V2 FIX"):
+            add(f"  {line}")
+    add("")
+    add("Old (v1) vs new (v2) score distributions:")
+    add(f"{'score':<44}{'v1 mean':>10}{'v1 std':>10}{'v2 mean':>10}{'v2 std':>10}")
+    for col in [c for c, _ in DIMENSIONS.values()] + ["LVI"]:
+        new = result[col]
+        if old_scores is not None and col in old_scores.columns:
+            old = old_scores[col]
+            add(f"{col:<44}{_fmt(old.mean(), 4):>10}{_fmt(old.std(), 4):>10}"
+                f"{_fmt(new.mean(), 4):>10}{_fmt(new.std(), 4):>10}")
+        else:
+            add(f"{col:<44}{'n/a':>10}{'n/a':>10}"
+                f"{_fmt(new.mean(), 4):>10}{_fmt(new.std(), 4):>10}")
+    if (old_scores is not None and "LVI" in old_scores.columns
+            and len(old_scores) == len(result)):
+        old_lvi = old_scores["LVI"].reset_index(drop=True)
+        new_lvi = result["LVI"].reset_index(drop=True)
+        diff = new_lvi - old_lvi
+        add("")
+        add("Household-level change in LVI (v2 - v1), same row order:")
+        add(f"  mean change            : {diff.mean():+.4f}")
+        add(f"  mean absolute change   : {diff.abs().mean():.4f}")
+        add(f"  max  absolute change   : {diff.abs().max():.4f}")
+        add(f"  Pearson  corr(v1, v2)  : {old_lvi.corr(new_lvi):.4f}")
+        add(f"  Spearman corr(v1, v2)  : {spearman(old_lvi, new_lvi):.4f}")
+    add("")
+    add("Row with missing hhid2 (0-based row index 0), retained and scored.")
+    add("Identifying columns for manual ID recovery:")
+    missing = result.index[result[HH_ID].isna()].tolist()
+    for i in missing:
+        vals = ", ".join(f"{c}={result.at[i, c]}" for c in LOCATION_COLS
+                         if c in result.columns)
+        add(f"  row {i}: {vals}")
+    add("")
+    add("Validation checks 4-9 re-run on the v2 scores (checks 1, 2, 3 and 10")
+    add("are unaffected by the change and were not re-run):")
+    add("")
+    L.extend(checks_4_to_9(result, summary, framework))
+    add("=" * 78)
+    add("END OF V2 CHANGELOG")
+    add("=" * 78)
+    return "\n".join(L)
+
+
+def main(argv: list[str] | None = None) -> int:
+    argv = sys.argv[1:] if argv is None else argv
+    append_changelog = "--append-v2-changelog" in argv
     print("=" * 70)
     print("BIHS R3 - Stage 1 LVI construction")
     print("=" * 70)
@@ -1152,11 +1248,23 @@ def main() -> int:
     report_path = OUTPUT_DIR / "lvi_validation_report.txt"
     method_path = OUTPUT_DIR / "lvi_methodology.md"
 
+    # Capture the previous scores BEFORE overwriting, for the v2 changelog.
+    old_scores = None
+    if scored_path.exists():
+        old_scores = pd.read_csv(scored_path, dtype={HH_ID: str}, low_memory=False)
+
     result.to_csv(scored_path, index=False)
     summary.to_csv(summary_path, index=False)
-    report = build_validation_report(
-        raw_df, result, summary, framework, prep_log, input_path, input_hash)
-    report_path.write_text(report, encoding="utf-8")
+    if append_changelog and report_path.exists():
+        # Keep the existing v1 report (checks 1-3 and 10 unaffected) and
+        # append the v2 changelog with checks 4-9 re-run.
+        with report_path.open("a", encoding="utf-8") as fh:
+            fh.write(build_v2_changelog(result, summary, framework,
+                                        old_scores, prep_log))
+    else:
+        report = build_validation_report(
+            raw_df, result, summary, framework, prep_log, input_path, input_hash)
+        report_path.write_text(report, encoding="utf-8")
     method_path.write_text(build_methodology_note(summary, result), encoding="utf-8")
 
     # ---- console summary --------------------------------------------------
@@ -1179,6 +1287,10 @@ def main() -> int:
     print(f"All scores within [0, 1]   : {'PASS' if in_range else 'FAIL'}")
     print(f"Households with LVI = NaN  : {int(result['LVI'].isna().sum())}")
     print(f"Missing household IDs      : {int(result[HH_ID].isna().sum())}")
+    for i in result.index[result[HH_ID].isna()].tolist():
+        vals = ", ".join(f"{c}={result.at[i, c]}" for c in LOCATION_COLS
+                         if c in result.columns)
+        print(f"  row {i} (no hhid2)        : {vals}")
     print("Constant indicators        : "
           f"{summary.loc[summary['is_constant'], 'indicator'].tolist() or 'none'}")
     print()
@@ -1188,7 +1300,8 @@ def main() -> int:
         print(f"  - {line}")
     print()
     print("Open issues requiring your decision (detail in the validation report):")
-    print("  C1  adult_literacy_rate appears INVERTED (corr -0.50 with schooling)")
+    print("  C1  adult_literacy_rate inverted -> RESOLVED in v2 as")
+    print("      adult_illiteracy_rate, forward-normalized")
     print("  C2  has_current_loan recoded from 1=Yes/2=No to 1/0 - please confirm")
     print("  C5  15 households record zero meal-days over 7 days")
     print()

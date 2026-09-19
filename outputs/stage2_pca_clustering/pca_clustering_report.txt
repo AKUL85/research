@@ -1,0 +1,238 @@
+
+================================================================================================
+BIHS ROUND 3 -- STAGE 2: PCA + CLUSTERING REPORT
+================================================================================================
+Generated            : 2026-09-19 16:11:46
+Script               : pca_clustering.py
+RANDOM SEED          : random_state = 42 (K-Means initialisation, PCA solver; Ward linkage is deterministic)
+Python               : 3.12.10
+numpy / pandas       : 2.5.2 / 3.0.6
+scikit-learn / scipy : 1.9.1 / 1.18.1
+
+------------------------------------------------------------------------------------------------
+0. INPUT
+------------------------------------------------------------------------------------------------
+File     : C:\Users\mahdy\research\outputs\stage1_lvi\bihs_r3_lvi_scored.csv
+SHA-256  : de4666c9002b3472904496ecdc0d07cec9d4afb5cbaf1bbe61d5c74c130b1e0b
+Shape    : 5605 rows x 55 columns
+Households with blank hhid2: 1 (retained; row order is the key)
+
+------------------------------------------------------------------------------------------------
+1. CLUSTERING FEATURES (15 normalized indicators)
+------------------------------------------------------------------------------------------------
+Features used (15), all on [0, 1] and oriented so that higher = more vulnerable (Stage 1 v2, post literacy-fix):
+                     normalized_feature         dimension                      raw_indicator   mean    std variance
+                    flood_affected_norm          Exposure                     flood_affected 0.5706 0.4950   0.2451
+               flood_depth_ft_mean_norm          Exposure                flood_depth_ft_mean 0.0624 0.0894   0.0080
+                 seasonal_wind_avg_norm          Exposure                  seasonal_wind_avg 0.6177 0.1303   0.0170
+   seasonal_evapotranspiration_avg_norm          Exposure    seasonal_evapotranspiration_avg 0.5575 0.1774   0.0315
+agricultural_occupation_dependence_norm       Sensitivity agricultural_occupation_dependence 0.0745 0.1012   0.0102
+                  dependency_ratio_norm       Sensitivity                   dependency_ratio 0.1430 0.1346   0.0181
+                           hh_size_norm       Sensitivity                            hh_size 0.1840 0.1025   0.0105
+             meals_per_person_week_norm       Sensitivity              meals_per_person_week 0.8015 0.0556   0.0031
+         income_per_capita_monthly_norm Adaptive Capacity          income_per_capita_monthly 0.7990 0.1884   0.0355
+             mean_edu_years_adults_norm Adaptive Capacity              mean_edu_years_adults 0.7369 0.1820   0.0331
+             adult_illiteracy_rate_norm Adaptive Capacity              adult_illiteracy_rate 0.1667 0.2749   0.0756
+              livelihood_diversity_norm Adaptive Capacity               livelihood_diversity 0.8189 0.1579   0.0249
+             any_nonfarm_agri_work_norm Adaptive Capacity              any_nonfarm_agri_work 0.7822 0.4128   0.1704
+           land_cultivable_decimal_norm Adaptive Capacity            land_cultivable_decimal 0.8672 0.1880   0.0353
+           has_current_loan_binary_norm Adaptive Capacity            has_current_loan_binary 0.2960 0.4565   0.2084
+Missing values in feature matrix: 0
+
+EXCLUDED from features (composites of the same indicators -> circular): LVI, exposure_score, sensitivity_score, adaptive_capacity_vulnerability_score, exposure_n_indicators, sensitivity_n_indicators, adaptive_capacity_vulnerability_n_indicators
+
+------------------------------------------------------------------------------------------------
+2. PRINCIPAL COMPONENT ANALYSIS
+------------------------------------------------------------------------------------------------
+Standardization: although every feature is min-max scaled to [0, 1], their
+variances differ by a factor of 79.4 (largest: flood_affected_norm = 0.2451; smallest: meals_per_person_week_norm = 0.0031).
+Covariance-matrix PCA would therefore be dominated by the 0/1 indicators.
+Each feature is z-scored (mean 0, SD 1) before PCA, i.e. PCA is run on the
+correlation matrix, giving every indicator equal a-priori weight. The same
+standardized matrix feeds the clustering.
+
+Explained variance (all 15 components):
+component eigenvalue explained_var_pct cumulative_pct
+      PC1     2.7238           18.1553        18.1553
+      PC2     1.8070           12.0447        30.2001
+      PC3     1.5760           10.5051        40.7052
+      PC4     1.3556            9.0358        49.7410
+      PC5     1.2455            8.3021        58.0431
+      PC6     0.9853            6.5672        64.6103
+      PC7     0.8905            5.9356        70.5458
+      PC8     0.8249            5.4982        76.0441
+      PC9     0.7692            5.1274        81.1714
+     PC10     0.5957            3.9705        85.1420
+     PC11     0.5810            3.8727        89.0147
+     PC12     0.4942            3.2943        92.3090
+     PC13     0.4546            3.0299        95.3389
+     PC14     0.3642            2.4273        97.7662
+     PC15     0.3351            2.2338       100.0000
+
+Retention rule: smallest number of components with cumulative explained variance >= 80 % (target band 80-85 %).
+RETAINED: 9 components (PC1-PC9) explaining 81.17 % of total variance (PC1-PC8: 76.04 %, below threshold).
+For reference, the Kaiser criterion (eigenvalue > 1) would retain 5 components (58.04 %).
+The 80 % rule is used because the aim is to feed clustering with a compact but
+nearly information-complete representation, not to interpret only the
+dominant axes.
+
+Component loading matrix (variable-component correlations = eigenvector x sqrt(eigenvalue)); ALL 15 components:
+                                feature         dimension    PC1    PC2    PC3    PC4    PC5    PC6    PC7    PC8    PC9   PC10   PC11   PC12   PC13   PC14   PC15
+                    flood_affected_norm          Exposure -0.641  0.167  0.025 -0.464  0.316 -0.025  0.135 -0.020 -0.023  0.052  0.202 -0.081 -0.027 -0.404 -0.107
+               flood_depth_ft_mean_norm          Exposure -0.566  0.389  0.012 -0.500  0.172 -0.031  0.182 -0.059 -0.050  0.008  0.161 -0.078  0.009  0.404  0.115
+                 seasonal_wind_avg_norm          Exposure  0.032 -0.482  0.111 -0.014  0.658 -0.043  0.198  0.270 -0.043  0.309 -0.160  0.282  0.015  0.054  0.038
+   seasonal_evapotranspiration_avg_norm          Exposure  0.021  0.660 -0.230 -0.160 -0.436  0.052  0.027  0.018  0.042  0.343 -0.068  0.398 -0.084 -0.050 -0.003
+agricultural_occupation_dependence_norm       Sensitivity -0.664  0.062  0.403  0.236 -0.078  0.098 -0.073  0.202  0.286 -0.178  0.016  0.141  0.003 -0.099  0.364
+                  dependency_ratio_norm       Sensitivity  0.083  0.485 -0.247  0.307  0.432 -0.097 -0.285  0.115 -0.394 -0.271  0.150  0.186 -0.162 -0.001  0.007
+                           hh_size_norm       Sensitivity -0.427  0.343 -0.335  0.511  0.052 -0.059 -0.034  0.177 -0.123  0.311 -0.059 -0.267  0.315 -0.020  0.049
+             meals_per_person_week_norm       Sensitivity -0.048  0.203 -0.189  0.466  0.224  0.337  0.581 -0.406  0.134 -0.106 -0.038  0.053 -0.056 -0.010 -0.020
+         income_per_capita_monthly_norm Adaptive Capacity  0.275  0.482  0.038 -0.035  0.426  0.057 -0.305  0.078  0.588  0.033 -0.141 -0.124 -0.078  0.046 -0.122
+             mean_edu_years_adults_norm Adaptive Capacity  0.226  0.333  0.733  0.128  0.019 -0.206  0.089 -0.070 -0.001 -0.067  0.153  0.177  0.372  0.021 -0.176
+             adult_illiteracy_rate_norm Adaptive Capacity  0.204  0.345  0.702  0.078  0.011 -0.075  0.089 -0.094 -0.291  0.174 -0.250 -0.223 -0.282 -0.046  0.094
+              livelihood_diversity_norm Adaptive Capacity  0.659  0.123 -0.203 -0.340  0.231 -0.069 -0.104 -0.366 -0.037 -0.022 -0.111  0.012  0.250 -0.121  0.315
+             any_nonfarm_agri_work_norm Adaptive Capacity  0.445  0.287 -0.152 -0.227 -0.101 -0.028  0.448  0.551 -0.019 -0.284 -0.184 -0.085  0.068 -0.050  0.011
+           land_cultivable_decimal_norm Adaptive Capacity  0.711 -0.015 -0.006  0.163 -0.009 -0.093  0.171  0.143  0.153  0.215  0.543 -0.100 -0.124 -0.018  0.140
+           has_current_loan_binary_norm Adaptive Capacity  0.228  0.040  0.205 -0.136  0.039  0.882 -0.157  0.141 -0.192  0.056  0.099 -0.029  0.106  0.007 -0.011
+
+Heavy loadings (|loading| >= 0.4) on the retained components; sign shows direction relative to the 'more vulnerable' orientation:
+  PC1 (18.16 %): cultivable land (dec) (+0.71); agri-occupation dependence (-0.66); livelihood diversity (+0.66); flood affected (0/1) (-0.64); flood depth (ft) (-0.57); non-farm work (0/1) (+0.45); household size (-0.43)
+  PC2 (12.04 %): seasonal evapotranspiration (+0.66); dependency ratio (+0.48); income per capita (+0.48); seasonal wind (-0.48)
+  PC3 (10.51 %): adult education (yrs) (+0.73); adult illiteracy rate (+0.70); agri-occupation dependence (+0.40)
+  PC4 ( 9.04 %): household size (+0.51); flood depth (ft) (-0.50); meals per person/week (+0.47); flood affected (0/1) (-0.46)
+  PC5 ( 8.30 %): seasonal wind (+0.66); seasonal evapotranspiration (-0.44); dependency ratio (+0.43); income per capita (+0.43)
+  PC6 ( 6.57 %): current loan (0/1) (+0.88)
+  PC7 ( 5.94 %): meals per person/week (+0.58); non-farm work (0/1) (+0.45)
+  PC8 ( 5.50 %): non-farm work (0/1) (+0.55); meals per person/week (-0.41)
+  PC9 ( 5.13 %): income per capita (+0.59)
+
+Suggested component names (for the paper; derived from heavy loadings):
+  PC1: Adaptive Capacity axis, led by cultivable land (dec) (7 heavy loading(s); dimensions: Adaptive Capacity=3, Exposure=2, Sensitivity=2)
+  PC2: Exposure axis, led by seasonal evapotranspiration (4 heavy loading(s); dimensions: Exposure=2, Sensitivity=1, Adaptive Capacity=1)
+  PC3: Adaptive Capacity axis, led by adult education (yrs) (3 heavy loading(s); dimensions: Adaptive Capacity=2, Sensitivity=1)
+  PC4: Exposure axis, led by household size (4 heavy loading(s); dimensions: Exposure=2, Sensitivity=2)
+  PC5: Exposure axis, led by seasonal wind (4 heavy loading(s); dimensions: Exposure=2, Sensitivity=1, Adaptive Capacity=1)
+  PC6: Adaptive Capacity axis, led by current loan (0/1) (1 heavy loading(s); dimensions: Adaptive Capacity=1)
+
+------------------------------------------------------------------------------------------------
+3. K-MEANS MODEL SELECTION (k = 2..8)
+------------------------------------------------------------------------------------------------
+Clustering space : 9 retained PC scores (81.17 % variance)
+Algorithm        : K-Means (k-means++ init, n_init=20, max_iter=500, random_state=42)
+Metrics          : silhouette (higher better, range -1..1), Davies-Bouldin (lower better), Calinski-Harabasz (higher better)
+Silhouette computed on all 5605 households (no subsampling).
+
+Full comparison table (every k tested):
+ k silhouette davies_bouldin calinski_harabasz    inertia  n_iter  smallest_cluster  largest_cluster  sil_rank  db_rank  ch_rank mean_rank
+ 2     0.1521         2.2347         1000.2244 57907.4789      13              2487             3118         1        6        1    2.6667
+ 3     0.1308         2.2820          776.3393 53434.7028      11              1287             2193         2        7        2    3.6667
+ 4     0.1263         2.1250          688.4386 49859.6957      50               823             1902         7        5        3    5.0000
+ 5     0.1265         2.0598          645.3078 46713.2210      33               688             1628         6        4        4    4.6667
+ 6     0.1280         1.9053          600.3552 44426.7187      53               167             1563         4        3        5    4.0000
+ 7     0.1275         1.8298          573.9392 42252.9434      40               159             1362         5        2        6    4.3333
+ 8     0.1289         1.8055          555.4775 40269.1810      18               142             1393         3        1        7    3.6667
+
+CHOSEN k = 2  (majority vote: 2 of 3 metrics prefer k=2 (silhouette -> k=2, Davies-Bouldin -> k=8, Calinski-Harabasz -> k=2)).
+
+Selection reasoning:
+Across k = 2..8, the silhouette index peaks at k=2 (0.1521), Davies-Bouldin is lowest at k=8 (1.8055) and Calinski-Harabasz is highest at k=2 (1000.2). k=2 is selected by majority vote. At k=2 the metrics are silhouette 0.1521 (runner-up k=3: 0.1308), Davies-Bouldin 2.2347 (runner-up k=8: 1.8055) and Calinski-Harabasz 1000.2 (runner-up k=3: 776.3). The smallest cluster at k=2 holds 2487 households (44.4 %), so no degenerate micro-cluster is produced. Silhouette values are modest in absolute terms, which is expected for survey data in a 9-dimensional PC space where household types form a continuum rather than well-separated blobs; the relative ordering across k, not the absolute level, drives the choice.
+
+------------------------------------------------------------------------------------------------
+4. FINAL K-MEANS (k=2) AND WARD HIERARCHICAL ROBUSTNESS CHECK
+------------------------------------------------------------------------------------------------
+K-Means clusters relabelled 1..2 in ascending order of mean LVI (labels are arbitrary in K-Means; this makes them readable).
+Final inertia: 57907.48; iterations to converge: 13
+
+Ward hierarchical clustering (Euclidean distance on the same retained PC scores,
+scipy linkage method='ward', cut at k=2 with criterion='maxclust').
+Adjusted Rand Index (K-Means vs Ward) : 0.2775
+Households in matched clusters        : 4281 / 5605 (76.4 %) after greedy one-to-one label matching
+ARI = 1 means identical partitions, 0 means chance-level agreement.
+
+Cross-tabulation (rows: K-Means cluster, cols: Ward cluster):
+ward       1     2
+kmeans            
+1       1902  1216
+2        108  2379
+
+Ward cluster sizes: W1=2010, W2=3595
+Ward silhouette at k=2: 0.1060 (K-Means: 0.1521)
+
+------------------------------------------------------------------------------------------------
+5. CLUSTER PROFILES
+------------------------------------------------------------------------------------------------
+Cluster sizes, mean LVI and mean dimension scores:
+cluster    n      pct    LVI exposure_score sensitivity_score adaptive_capacity_vulnerability_score
+      1 3118  55.6289 0.4550         0.3817            0.2839                                0.6995
+      2 2487  44.3711 0.4744         0.5403            0.3218                                0.5611
+    ALL 5605 100.0000 0.4636         0.4521            0.3008                                0.6381
+
+One-way tests across clusters on LVI and dimension scores (context only):
+  LVI                                        ANOVA F=    127.24 p= 3.39e-29 | KW H=    164.16 p=1.39e-37
+  exposure_score                             ANOVA F=   2182.93 p= < 1e-300 | KW H=   1190.62 p=6.67e-261
+  sensitivity_score                          ANOVA F=    626.77 p=3.26e-131 | KW H=    633.97 p=6.85e-140
+  adaptive_capacity_vulnerability_score      ANOVA F=   1815.33 p= < 1e-300 | KW H=   1413.38 p=< 1e-300
+
+Mean of each RAW indicator by cluster, with one-way ANOVA and Kruskal-Wallis.
+Normality is assessed per indicator with D'Agostino-Pearson K^2 on the pooled
+residuals (value minus own-cluster mean). Because BIHS indicators are counts,
+0/1 flags and right-skewed monetary/land amounts, normality is rejected for
+essentially all of them at n = 5605, so Kruskal-Wallis is designated the PRIMARY
+test and ANOVA is reported alongside for readers who expect F-statistics.
+Effect sizes: eta^2 = SS_between / SS_total (ANOVA); epsilon^2 = (H - k + 1) / (n - k) (Kruskal-Wallis).
+Bonferroni-adjusted alpha for 15 indicator tests: 0.00333.
+
+Normality rejected (p < 0.05) for 15 of 15 indicators -> PRIMARY test: Kruskal-Wallis.
+
+                     raw_indicator         dimension  C1_mean  C2_mean ALL_mean normality_K2 normality_p  anova_F   anova_p  eta2 kruskal_H kruskal_p epsilon2
+                    flood_affected          Exposure    0.315    0.891    0.571       45.297    1.46e-10 2814.079  < 1e-300 0.334  1873.583  < 1e-300    0.334
+               flood_depth_ft_mean          Exposure    0.577    2.231    1.311     3642.993    < 1e-300 1329.581 2.09e-261 0.192  1733.470  < 1e-300    0.309
+                 seasonal_wind_avg          Exposure    2.774    2.792    2.782      405.221    1.02e-88    3.571    0.0589 0.001     0.212    0.6452   -0.000
+   seasonal_evapotranspiration_avg          Exposure    3.924    3.871    3.900      211.113    1.44e-46   32.060  1.57e-08 0.006    40.693  1.78e-10    0.007
+agricultural_occupation_dependence       Sensitivity    0.110    0.870    0.447     1565.813    < 1e-300 3536.848  < 1e-300 0.387  2428.849  < 1e-300    0.433
+                  dependency_ratio       Sensitivity    0.933    0.763    0.858     1747.900    < 1e-300   61.951  4.20e-15 0.011    30.075  4.16e-08    0.005
+                           hh_size       Sensitivity    3.730    4.626    4.128     1185.203   4.33e-258  391.748  2.48e-84 0.065   339.214  9.47e-76    0.060
+             meals_per_person_week       Sensitivity    7.552    7.531    7.542     4679.950    < 1e-300    0.130    0.7184 0.000     1.406    0.2357    0.000
+         income_per_capita_monthly Adaptive Capacity 2086.071 3047.367 2512.609     1775.607    < 1e-300  240.281  4.27e-53 0.041   303.382  6.04e-68    0.054
+             mean_edu_years_adults Adaptive Capacity    4.212    4.799    4.472      177.657    2.64e-39   50.269  1.51e-12 0.009    45.034  1.94e-11    0.008
+             adult_illiteracy_rate Adaptive Capacity    0.187    0.141    0.167     1509.570    < 1e-300   38.421  6.11e-10 0.007     8.500    0.0036    0.001
+              livelihood_diversity Adaptive Capacity    0.390    1.144    0.725      557.961   6.92e-122 3042.628  < 1e-300 0.352  2084.771  < 1e-300    0.372
+             any_nonfarm_agri_work Adaptive Capacity    0.082    0.388    0.218      707.547   2.28e-154  873.934 1.29e-178 0.135   756.149 1.85e-166    0.135
+           land_cultivable_decimal Adaptive Capacity   20.657  122.267   65.742     2499.815    < 1e-300 2337.051  < 1e-300 0.294  2477.397  < 1e-300    0.442
+           has_current_loan_binary Adaptive Capacity    0.654    0.767    0.704     4179.896    < 1e-300   85.805  2.77e-20 0.015    84.526  3.79e-20    0.015
+
+Indicators differing significantly across clusters at Bonferroni alpha 0.00333: Kruskal-Wallis 12/15, ANOVA 13/15.
+Not significant (Kruskal-Wallis, Bonferroni): seasonal_wind_avg, meals_per_person_week, adult_illiteracy_rate
+Largest Kruskal-Wallis effect sizes (epsilon^2): cultivable land (dec)=0.442, agri-occupation dependence=0.433, livelihood diversity=0.372, flood affected (0/1)=0.334, flood depth (ft)=0.309
+Smallest: adult illiteracy rate=0.001, meals per person/week=0.000, seasonal wind=-0.000
+
+------------------------------------------------------------------------------------------------
+6. CLUSTER DESCRIPTIONS AND NAMES
+------------------------------------------------------------------------------------------------
+Each cluster is characterised by how far its mean on each NORMALIZED indicator
+(higher = more vulnerable) sits from the sample mean, in pooled-SD units
+(standardized mean difference, SMD). |SMD| >= 0.30 is treated as a defining
+trait; the name is built from the largest-|SMD| traits plus the LVI rank.
+
+CLUSTER 1: "off-farm, single-livelihood, flood-spared (average-LVI)"
+  n = 3118 households (55.6 %); mean LVI = 0.4550 (sample 0.4636); exposure 0.382, sensitivity 0.284, adaptive-capacity vulnerability 0.700.
+  Defining traits: agri-occupation dependence raw mean 0.11 vs 0.45 (SMD -0.56 toward less vulnerable); livelihood diversity raw mean 0.39 vs 0.72 (SMD +0.53 toward more vulnerable); flood affected (0/1) raw mean 0.31 vs 0.57 (SMD -0.52 toward less vulnerable); cultivable land (dec) raw mean 20.66 vs 65.74 (SMD +0.48 toward more vulnerable); flood depth (ft) raw mean 0.58 vs 1.31 (SMD -0.39 toward less vulnerable); non-farm work (0/1) raw mean 0.08 vs 0.22 (SMD +0.33 toward more vulnerable).
+  Cluster 1 groups 3118 households (55.6 % of the sample) and has a mean LVI of 0.455, 0.009 below the sample mean of 0.464. Relative to the whole sample its adaptive-capacity vulnerability score is highest (+0.061) and its exposure score is lowest (-0.070). Key raw values: 31 % report flooding (sample 57 %); income per capita 2086 Tk/month (sample 2513); cultivable land 21 decimals (sample 66); adult illiteracy 19 % (sample 17 %); 8 % have non-farm work (sample 22 %); 65 % hold a loan (sample 70 %). The descriptive name "off-farm, single-livelihood, flood-spared (average-LVI)" summarises the 6 indicator(s) with |SMD| >= 0.30.
+
+CLUSTER 2: "agriculture-dependent, diversified-livelihood, flood-exposed (average-LVI)"
+  n = 2487 households (44.4 %); mean LVI = 0.4744 (sample 0.4636); exposure 0.540, sensitivity 0.322, adaptive-capacity vulnerability 0.561.
+  Defining traits: agri-occupation dependence raw mean 0.87 vs 0.45 (SMD +0.70 toward more vulnerable); livelihood diversity raw mean 1.14 vs 0.72 (SMD -0.66 toward less vulnerable); flood affected (0/1) raw mean 0.89 vs 0.57 (SMD +0.65 toward more vulnerable); cultivable land (dec) raw mean 122.27 vs 65.74 (SMD -0.61 toward less vulnerable); flood depth (ft) raw mean 2.23 vs 1.31 (SMD +0.49 toward more vulnerable); non-farm work (0/1) raw mean 0.39 vs 0.22 (SMD -0.41 toward less vulnerable).
+  Cluster 2 groups 2487 households (44.4 % of the sample) and has a mean LVI of 0.474, 0.011 above the sample mean of 0.464. Relative to the whole sample its exposure score is highest (+0.088) and its adaptive-capacity vulnerability score is lowest (-0.077). Key raw values: 89 % report flooding (sample 57 %); income per capita 3047 Tk/month (sample 2513); cultivable land 122 decimals (sample 66); adult illiteracy 14 % (sample 17 %); 39 % have non-farm work (sample 22 %); 77 % hold a loan (sample 70 %). The descriptive name "agriculture-dependent, diversified-livelihood, flood-exposed (average-LVI)" summarises the 6 indicator(s) with |SMD| >= 0.30.
+
+
+------------------------------------------------------------------------------------------------
+7. OUTPUT FILES
+------------------------------------------------------------------------------------------------
+(a) bihs_r3_clustered.csv: 5605 rows x 67 cols = original 55 columns + cluster_kmeans, cluster_ward, cluster_name, PC1, PC2, PC3, PC4, PC5, PC6, PC7, PC8, PC9
+(b) cluster_profile_summary.csv: 19 rows (4 composites + 15 raw indicators) x 25 cols
+(c) pca_clustering_report.txt: this report
+
+Sanity checks:
+  cluster label counts sum to n: True
+  PC scores are mean-zero: max |mean| = 4.43e-16
+  PC score variances equal eigenvalues: True
+  re-running KMeans with the same seed reproduces labels: True
