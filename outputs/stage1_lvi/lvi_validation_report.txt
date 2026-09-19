@@ -1,0 +1,442 @@
+==============================================================================
+BIHS ROUND 3 - STAGE 1 LIVELIHOOD VULNERABILITY INDEX (LVI)
+Validation and data-quality report
+==============================================================================
+Generated             : 2026-09-18 16:50:44
+Input file            : bihs_r3_cleaned (1).csv
+Input SHA-256         : 20fc489bd20edbe58b5d3de3dee9f333e00cee8ca360044348e431514f521d3f
+pandas / numpy        : 3.0.6 / 2.5.2
+Python                : 3.12.10
+
+Scope: indicator preparation -> min-max normalization -> dimension
+scores -> composite LVI. No PCA, clustering, ML, or Low/Medium/High
+classification is performed at this stage, by design.
+
+------------------------------------------------------------------------------
+CHECK 1 | INPUT AND OUTPUT ROW COUNTS
+------------------------------------------------------------------------------
+Input rows                 : 5605
+Input columns              : 137
+Output rows                : 5605
+Output columns             : 54
+Expected rows (5605)       : PASS
+Expected columns (137)     : PASS
+Rows preserved end-to-end  : PASS - no household dropped
+
+------------------------------------------------------------------------------
+CHECK 2 | HOUSEHOLD IDENTIFIER
+------------------------------------------------------------------------------
+Identifier column          : hhid2 (dtype=str)
+Missing identifiers        : 1
+Duplicated (non-missing)   : 0
+Distinct non-missing IDs   : 5604
+Uniqueness                 : PASS
+WARNING: 1 row(s) carry no household identifier (0-based row index [0]).
+         These rows were RETAINED and scored; they simply cannot be
+         linked back to the roster. Recommend recovering the ID before
+         any merge or panel linkage.
+
+------------------------------------------------------------------------------
+CHECK 3 | MISSING VALUES IN INDICATOR AND SCORE COLUMNS
+------------------------------------------------------------------------------
+column                                           n_missing       pct
+flood_affected                                           0     0.00%
+flood_depth_ft_mean                                      0     0.00%
+seasonal_wind_avg                                        0     0.00%
+seasonal_evapotranspiration_avg                          0     0.00%
+agricultural_occupation_dependence                       0     0.00%
+dependency_ratio                                         0     0.00%
+hh_size                                                  0     0.00%
+meals_per_person_week                                    0     0.00%
+income_per_capita_monthly                                0     0.00%
+mean_edu_years_adults                                    0     0.00%
+adult_literacy_rate                                      0     0.00%
+livelihood_diversity                                     0     0.00%
+any_nonfarm_agri_work                                    0     0.00%
+land_cultivable_decimal                                  0     0.00%
+has_current_loan_binary                                  0     0.00%
+flood_affected_norm                                      0     0.00%
+flood_depth_ft_mean_norm                                 0     0.00%
+seasonal_wind_avg_norm                                   0     0.00%
+seasonal_evapotranspiration_avg_norm                     0     0.00%
+agricultural_occupation_dependence_norm                  0     0.00%
+dependency_ratio_norm                                    0     0.00%
+hh_size_norm                                             0     0.00%
+meals_per_person_week_norm                               0     0.00%
+income_per_capita_monthly_norm                           0     0.00%
+mean_edu_years_adults_norm                               0     0.00%
+adult_literacy_rate_norm                                 0     0.00%
+livelihood_diversity_norm                                0     0.00%
+any_nonfarm_agri_work_norm                               0     0.00%
+land_cultivable_decimal_norm                             0     0.00%
+has_current_loan_binary_norm                             0     0.00%
+exposure_score                                           0     0.00%
+sensitivity_score                                        0     0.00%
+adaptive_capacity_vulnerability_score                    0     0.00%
+LVI                                                      0     0.00%
+
+Total missing cells across indicator and score columns: 0
+Missing-value policy:
+  - Raw missing values are PRESERVED as NaN through normalization
+    (never silently replaced with zero).
+  - A dimension score is the mean of the indicators actually observed
+    for that household; the count used is written to the matching
+    *_n_indicators column so partial scores are always visible.
+  - LVI requires all three dimension scores; otherwise it is NaN.
+  - No household is dropped for missingness.
+
+------------------------------------------------------------------------------
+CHECK 4 | NORMALIZED INDICATOR DISTRIBUTIONS
+------------------------------------------------------------------------------
+indicator                                   min      max     mean      std
+flood_affected                           0.0000   1.0000   0.5706   0.4950
+flood_depth_ft_mean                      0.0000   1.0000   0.0624   0.0894
+seasonal_wind_avg                        0.0000   1.0000   0.6177   0.1303
+seasonal_evapotranspiration_avg          0.0000   1.0000   0.5575   0.1774
+agricultural_occupation_dependence       0.0000   1.0000   0.0745   0.1012
+dependency_ratio                         0.0000   1.0000   0.1430   0.1346
+hh_size                                  0.0000   1.0000   0.1840   0.1025
+meals_per_person_week                    0.0000   1.0000   0.8015   0.0556
+income_per_capita_monthly                0.0000   1.0000   0.7990   0.1884
+mean_edu_years_adults                    0.0000   1.0000   0.7369   0.1820
+adult_literacy_rate                      0.0000   1.0000   0.8333   0.2749
+livelihood_diversity                     0.0000   1.0000   0.8189   0.1579
+any_nonfarm_agri_work                    0.0000   1.0000   0.7822   0.4128
+land_cultivable_decimal                  0.0000   1.0000   0.8672   0.1880
+has_current_loan_binary                  0.0000   1.0000   0.2960   0.4565
+
+Raw min/max actually used for each rescaling:
+indicator                                    raw min       raw max
+flood_affected                                0.0000        1.0000
+flood_depth_ft_mean                           0.0000       21.0000
+seasonal_wind_avg                             1.0902        3.8285
+seasonal_evapotranspiration_avg               2.8015        4.7719
+agricultural_occupation_dependence            0.0000        6.0000
+dependency_ratio                              0.0000        6.0000
+hh_size                                       1.0000       18.0000
+meals_per_person_week                         0.0000       38.0000
+income_per_capita_monthly                     0.0000    12500.0000
+mean_edu_years_adults                         0.0000       17.0000
+adult_literacy_rate                           0.0000        1.0000
+livelihood_diversity                          0.0000        4.0000
+any_nonfarm_agri_work                         0.0000        1.0000
+land_cultivable_decimal                       0.0000      495.0000
+has_current_loan_binary                       0.0000        1.0000
+
+------------------------------------------------------------------------------
+CHECK 5 | DIMENSION SCORES AND COMPOSITE LVI
+------------------------------------------------------------------------------
+score                                            min     max    mean     std      n
+exposure_score                                0.1572  0.8482  0.4521  0.1489   5605
+sensitivity_score                             0.0000  0.7176  0.3008  0.0594   5605
+adaptive_capacity_vulnerability_score         0.2536  1.0000  0.7333  0.1205   5605
+LVI                                           0.2966  0.6934  0.4954  0.0615   5605
+
+LVI percentiles:
+  p1   : 0.3540
+  p5   : 0.3980
+  p10  : 0.4189
+  p25  : 0.4495
+  p50  : 0.4947
+  p75  : 0.5408
+  p90  : 0.5756
+  p95  : 0.5954
+  p99  : 0.6282
+
+Correlation between dimension scores and LVI (Pearson):
+                                              exposure_sco  sensitivity_  adaptive_cap           LVI
+exposure_score                                      1.0000        0.1693       -0.1825        0.7422
+sensitivity_score                                   0.1693        1.0000       -0.1821        0.3395
+adaptive_capacity_vulnerability_score              -0.1825       -0.1821        1.0000        0.4471
+LVI                                                 0.7422        0.3395        0.4471        1.0000
+
+------------------------------------------------------------------------------
+CHECK 6 | ALL VALID SCORES WITHIN [0, 1]
+------------------------------------------------------------------------------
+flood_affected_norm                           [0.000000, 1.000000]  PASS
+flood_depth_ft_mean_norm                      [0.000000, 1.000000]  PASS
+seasonal_wind_avg_norm                        [0.000000, 1.000000]  PASS
+seasonal_evapotranspiration_avg_norm          [0.000000, 1.000000]  PASS
+agricultural_occupation_dependence_norm       [0.000000, 1.000000]  PASS
+dependency_ratio_norm                         [0.000000, 1.000000]  PASS
+hh_size_norm                                  [0.000000, 1.000000]  PASS
+meals_per_person_week_norm                    [0.000000, 1.000000]  PASS
+income_per_capita_monthly_norm                [0.000000, 1.000000]  PASS
+mean_edu_years_adults_norm                    [0.000000, 1.000000]  PASS
+adult_literacy_rate_norm                      [0.000000, 1.000000]  PASS
+livelihood_diversity_norm                     [0.000000, 1.000000]  PASS
+any_nonfarm_agri_work_norm                    [0.000000, 1.000000]  PASS
+land_cultivable_decimal_norm                  [0.000000, 1.000000]  PASS
+has_current_loan_binary_norm                  [0.000000, 1.000000]  PASS
+exposure_score                                [0.157235, 0.848203]  PASS
+sensitivity_score                             [0.000000, 0.717634]  PASS
+adaptive_capacity_vulnerability_score         [0.253611, 1.000000]  PASS
+LVI                                           [0.296623, 0.693415]  PASS
+
+Overall range check: PASS
+
+------------------------------------------------------------------------------
+CHECK 7 | DIRECTION - HIGHER ADAPTIVE CAPACITY => LOWER VULNERABILITY
+------------------------------------------------------------------------------
+For every reverse-normalized indicator the raw value must correlate
+-1.00 with its own normalized value, and negatively with the Adaptive
+Capacity vulnerability score and the composite LVI.
+
+indicator                               r(raw,norm)   r(raw,AC)  r(raw,LVI)  verdict
+meals_per_person_week                       -1.0000     -0.0130     -0.1326  PASS
+income_per_capita_monthly                   -1.0000     -0.4186     -0.3337  PASS
+mean_edu_years_adults                       -1.0000     -0.1869     -0.0608  PASS
+adult_literacy_rate                         -1.0000     -0.0717     -0.0911  PASS
+livelihood_diversity                        -1.0000     -0.4682     -0.0770  PASS
+any_nonfarm_agri_work                       -1.0000     -0.6527     -0.3264  PASS
+land_cultivable_decimal                     -1.0000     -0.4965      0.0444  PASS
+has_current_loan_binary                     -1.0000     -0.6002     -0.3056  PASS
+
+Forward-normalized indicators (higher raw = higher vulnerability):
+indicator                               r(raw,norm)
+flood_affected                               1.0000  PASS
+flood_depth_ft_mean                          1.0000  PASS
+seasonal_wind_avg                            1.0000  PASS
+seasonal_evapotranspiration_avg              1.0000  PASS
+agricultural_occupation_dependence           1.0000  PASS
+dependency_ratio                             1.0000  PASS
+hh_size                                      1.0000  PASS
+
+Overall direction check: PASS
+
+NOTE on adult_literacy_rate: this indicator passes the mechanical
+direction check (it is reverse-normalized exactly as specified), but the
+underlying variable appears to be inverted in the cleaned data. See the
+CAVEATS section below - this is the single most important open issue.
+
+------------------------------------------------------------------------------
+CHECK 8 | CONSTANT OR LOW-VARIATION INDICATORS
+------------------------------------------------------------------------------
+indicator                               n_unique       raw std   norm std  status
+flood_affected                                 2        0.4950     0.4950  ok
+flood_depth_ft_mean                          365        1.8774     0.0894  ok
+seasonal_wind_avg                             39        0.3568     0.1303  ok
+seasonal_evapotranspiration_avg               39        0.3495     0.1774  ok
+agricultural_occupation_dependence             7        0.6071     0.1012  ok
+dependency_ratio                              38        0.8077     0.1346  ok
+hh_size                                       17        1.7419     0.1025  ok
+meals_per_person_week                        228        2.1113     0.0556  ok
+income_per_capita_monthly                   2106     2355.4037     0.1884  ok
+mean_edu_years_adults                        185        3.0932     0.1820  ok
+adult_literacy_rate                           19        0.2749     0.2749  ok
+livelihood_diversity                           5        0.6315     0.1579  ok
+any_nonfarm_agri_work                          2        0.4128     0.4128  ok
+land_cultivable_decimal                      533       93.0584     0.1880  ok
+has_current_loan_binary                        2        0.4565     0.4565  ok
+
+Constant indicators: none
+Low-variation (normalized std < 0.05): none
+No second winsorization or outlier capping was applied: the input is
+already cleaned and winsorized, so re-capping would compound the
+treatment. Normalization uses the observed min/max as they stand.
+
+------------------------------------------------------------------------------
+CHECK 9 | HOUSEHOLDS WITH INCOMPLETE DIMENSION SCORES OR LVI
+------------------------------------------------------------------------------
+Exposure (expects 4 indicators):
+    4 indicator(s) used : 5605 household(s)
+Sensitivity (expects 4 indicators):
+    4 indicator(s) used : 5605 household(s)
+Adaptive Capacity (expects 7 indicators):
+    7 indicator(s) used : 5605 household(s)
+
+Households with a complete LVI : 5605
+Households with LVI = NaN      : 0
+Completeness: PASS - every household fully scored
+
+------------------------------------------------------------------------------
+CHECK 10 | CLIMATE INDICATORS CONSTANT WITHIN DISTRICTS
+------------------------------------------------------------------------------
+The cleaned dataset carries NO explicit district identifier column: no
+variable in the file partitions the climate series (the BIHS a10/a11/
+a13/a14/a15/a23 codes all mix multiple climate profiles). The check is
+therefore run against a district key reconstructed from the distinct
+combinations of the seasonal climate series themselves.
+
+Distinct climate profiles (reconstructed districts): 39
+Households per profile: min=18, median=145, max=379
+
+Per-column distinct values within each reconstructed district:
+  clim_aus_wind_avg                        max distinct = 1  PASS
+  clim_aman_wind_avg                       max distinct = 1  PASS
+  clim_boro_wind_avg                       max distinct = 1  PASS
+  clim_aus_evapotrans_avg                  max distinct = 1  PASS
+  clim_aman_evapotrans_avg                 max distinct = 1  PASS
+  clim_boro_evapotrans_avg                 max distinct = 1  PASS
+  seasonal_wind_avg                        max distinct = 1  PASS
+  seasonal_evapotranspiration_avg          max distinct = 1  PASS
+
+Climate constancy check: PASS
+Confirms the climate variables are district-level contextual data merged
+onto households, not household-specific weather measurements. Two
+households in the same district necessarily share identical exposure on
+these two indicators.
+
+------------------------------------------------------------------------------
+INDICATOR PREPARATION LOG
+------------------------------------------------------------------------------
+  seasonal_wind_avg: averaged over ['clim_aus_wind_avg', 'clim_aman_wind_avg', 'clim_boro_wind_avg']
+  seasonal_evapotranspiration_avg: averaged over ['clim_aus_evapotrans_avg', 'clim_aman_evapotrans_avg', 'clim_boro_evapotrans_avg']
+  RECODE: has_current_loan (1=Yes, 2=No) -> has_current_loan_binary (1=Yes, 0=No). 3946 of 5605 households hold a current loan.
+  Exposure: 4 indicators, equal weights -> exposure_score
+  Sensitivity: 4 indicators, equal weights -> sensitivity_score
+  Adaptive Capacity: 7 indicators, equal weights -> adaptive_capacity_vulnerability_score
+
+==============================================================================
+WARNINGS AND METHODOLOGICAL CAVEATS
+==============================================================================
+
+[C1] adult_literacy_rate APPEARS INVERTED - REQUIRES A DECISION
+------------------------------------------------------------------------------
+  The brief flagged this variable for zero-inflation (median 0, ~66% of
+  households at zero), which is confirmed: 66.4% are zero.
+  However the variable also appears to be measuring the OPPOSITE of
+  literacy. Evidence from the cleaned file:
+    - corr(adult_literacy_rate, mean_edu_years_adults) = -0.5048
+    - corr(adult_literacy_rate, max_edu_years)         = -0.4132
+    - corr(adult_literacy_rate, income_per_capita)     = -0.1185
+    - Mean adult schooling by literacy-rate band:
+        literacy in (-0.01, 0.0]   -> 5.42 years (n=3719)
+        literacy in (0.0, 0.34]    -> 3.97 years (n=810)
+        literacy in (0.34, 0.67]   -> 2.19 years (n=771)
+        literacy in (0.67, 1.0]    -> 0.08 years (n=305)
+    - adult_literacy_rate == n_literate_15plus / n_adults_15plus exactly,
+      so the inversion originates in n_literate_15plus.
+    - head_literate is a 4-category code (1,2,3,4), not a 1/2 yes-no:
+        head_literate=1 -> mean head_edu_years 0.00 (n=1040)
+        head_literate=2 -> mean head_edu_years 0.23 (n=1594)
+        head_literate=3 -> mean head_edu_years 2.67 (n=3)
+        head_literate=4 -> mean head_edu_years 6.89 (n=2968)
+      Codes 1 and 2 carry ~0 years of schooling while code 4 carries ~6.9,
+      so counting codes 1/2 as 'literate' would produce exactly this
+      inversion.
+  Households with MORE schooling currently record LOWER literacy. Read
+  literally, the variable behaves like an adult ILLITERACY rate.
+
+  ACTION TAKEN: none. The indicator is included and reverse-normalized
+  exactly as the framework specifies. It has NOT been altered.
+
+  CONSEQUENCE IF LEFT AS IS: within Adaptive Capacity this indicator
+  pushes better-educated households towards HIGHER vulnerability,
+  partially offsetting mean_edu_years_adults, which points the other way.
+
+  DIAGNOSTIC (not written to any output column): recomputing the LVI with
+  the literacy indicator replaced by (1 - adult_literacy_rate) gives:
+    - mean LVI  as specified : 0.4954
+    - mean LVI  with fix     : 0.4636
+    - mean absolute change   : 0.0375
+    - max  absolute change   : 0.0476
+    - Pearson  corr(LVI, LVI_fixed)  : 0.9149
+    - Spearman corr(LVI, LVI_fixed)  : 0.9127
+
+  RECOMMENDED RESOLUTION (needs your approval before implementation):
+    (a) Re-derive n_literate_15plus from the raw BIHS literacy codes so
+        that literate = the schooling-bearing category, then rebuild the
+        indicator. This is the correct fix if the cleaning miscoded it.
+    (b) If re-derivation is not possible, keep the variable but rename it
+        adult_illiteracy_rate and FORWARD-normalize it (higher = more
+        vulnerable), which restores the intended direction.
+    (c) Drop it from Adaptive Capacity, leaving 6 indicators, on the
+        grounds that mean_edu_years_adults already captures human capital.
+
+[C2] has_current_loan WAS RECODED - PLEASE CONFIRM
+------------------------------------------------------------------------------
+  In the cleaned file has_current_loan carries the BIHS survey coding
+  1 = Yes and 2 = No, not a 0/1 dummy. Verified:
+    has_current_loan=1: n=3946  mean n_loans=1.68  mean outstanding=86,539
+    has_current_loan=2: n=1659  mean n_loans=0.00  mean outstanding=0
+  Left on the raw 1/2 scale, reverse min-max normalization would map
+  'has a loan' to 1.0 = MAXIMUM vulnerability and 'no loan' to 0.0, the
+  exact inverse of the framework, which treats current borrowing as a
+  proxy for credit access under Adaptive Capacity.
+
+  ACTION TAKEN: recoded to has_current_loan_binary (1 = Yes, 0 = No) and
+  that binary indicator is what is reverse-normalized. This preserves the
+  stated framework rather than changing it; the original column is
+  untouched and is carried through to the output for inspection.
+
+  SIMPLIFICATION TO DOCUMENT IN THE PAPER: current borrowing is used as a
+  proxy for credit ACCESS / coping resources, not as debt burden. The two
+  readings are opposed - a household deep in high-interest debt is not
+  more resilient - so this is a genuine limitation, not merely a coding
+  choice. loan_outstanding_total and loan_interest_rate_mean are present
+  in the data if you later want a burden-sensitive alternative.
+
+[C3] FLOOD INDICATORS ARE STRUCTURALLY COLLINEAR
+------------------------------------------------------------------------------
+  flood_affected == 1 if and only if flood_depth_ft_mean > 0, for all
+  5605 of 5605 households. flood_depth_ft_mean is zero for
+  every unaffected household, so the two Exposure indicators share the
+  same zero/non-zero structure and flooding effectively carries 2 of the
+  4 Exposure slots, i.e. 50% of the dimension. The remaining two slots
+  are district-level climate. Consider whether this weighting is what you
+  intend before the paper is written.
+
+[C4] CLIMATE INDICATORS ARE DISTRICT-LEVEL CONTEXT
+------------------------------------------------------------------------------
+  seasonal_wind_avg and seasonal_evapotranspiration_avg take only
+  39 distinct values each - one per district - and are merged
+  onto households. They are contextual, not household-specific weather.
+  Half of the Exposure dimension therefore varies only between districts,
+  and standard errors in any later district-level analysis should account
+  for this clustering.
+
+[C5] ZERO-MEAL HOUSEHOLDS
+------------------------------------------------------------------------------
+  15 household(s) record mealdays_total_7d = 0, with all four
+  demographic meal-day components at zero. Zero meals over a 7-day recall
+  is implausible as a genuine measurement and most likely reflects
+  non-response or an absent household.
+  These households receive meals_per_person_week = 0, which after reverse
+  normalization becomes 1.0 - the MAXIMUM food-pressure vulnerability -
+  and they also set the lower anchor of the min-max range for that
+  indicator, compressing everyone else.
+  ACTION TAKEN: none; the values are left exactly as cleaned and the
+  households are retained. RECOMMENDATION: decide whether these should be
+  treated as missing, which would raise the observed minimum and rescale
+  the indicator for all households.
+
+[C6] SKEW IN meals_per_person_week
+------------------------------------------------------------------------------
+  Distribution: min=0.00, p25=7.00, median=7.00, p75=7.75, max=38.00
+  The upper tail sits far above the median, so min-max normalization
+  compresses the bulk of households into a narrow band near the top of
+  the reversed scale. This is a known property of min-max on skewed
+  variables and is reported rather than corrected, since the brief
+  prohibits a second capping pass.
+
+[C7] LAND VALUE 99 IS GENUINE, NOT A SURVEY CODE
+------------------------------------------------------------------------------
+  land_cultivable_decimal == 99 occurs 17 times. Checked
+  against neighbouring values to rule out a 99 = 'not applicable' code:
+    95:12, 96:13, 97:6, 98:11, 99:17, 100:25, 101:10, 102:14
+  The frequency at 99 is in line with its neighbours and 99 decimals is
+  about one acre, so it is treated as a genuine measurement.
+  Separately, 2000 households report zero cultivable land
+  (35.7%), which is substantively
+  meaningful - landlessness - and is retained as a true zero.
+
+[C8] EQUAL WEIGHTING
+------------------------------------------------------------------------------
+  Indicators are equally weighted within each dimension and the three
+  dimensions are equally weighted in the composite, per the brief. Because
+  the dimensions hold 4, 4 and 7 indicators, a single Adaptive Capacity
+  indicator carries 1/21 of the composite while a single Exposure
+  indicator carries 1/12. This is the standard balanced-weighted-average
+  LVI convention (Hahn et al.), but it is a choice worth stating.
+
+[C9] INPUT FILENAME
+------------------------------------------------------------------------------
+  The brief specifies bihs_r3_cleaned.csv; the file present is
+  'bihs_r3_cleaned (1).csv'. It matches the expected shape
+  (5605 x 137) and was read unmodified. The script
+  prefers the canonical name if you rename it.
+
+==============================================================================
+END OF REPORT
+==============================================================================
