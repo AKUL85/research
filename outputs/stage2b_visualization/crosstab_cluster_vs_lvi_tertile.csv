@@ -1,0 +1,6 @@
+cluster,Low_n,Medium_n,High_n,Low_row_pct,Medium_row_pct,High_row_pct,Low_col_pct,Medium_col_pct,High_col_pct,total_n
+1,1259,1000,859,40.4,32.1,27.5,67.4,53.5,46.0,3118
+2,610,868,1009,24.5,34.9,40.6,32.6,46.5,54.0,2487
+
+# LVI tertile cut-points (sample terciles): Low <= 0.4326 < Medium <= 0.4937 < High
+# chi-square = 177.95, df = 2, p = 2.28e-39; Cramer's V = 0.178; Spearman rho (cluster LVI-rank vs tertile) = 0.176, p = 4.37e-40
