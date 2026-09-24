@@ -1,0 +1,12 @@
+variant,n,model,cv,roc_auc,pr_auc,brier
+baseline_current,5605,fixed LogisticRegression C=0.1,E1 outer climate-profile folds,0.6212447352347739,0.46328162416863927,0.21384983233533955
+literacy_direction_reversed,5605,fixed LogisticRegression C=0.1,E1 outer climate-profile folds,0.6361617967258179,0.46953725043204897,0.21292298943360177
+literacy_omitted,5605,fixed LogisticRegression C=0.1,E1 outer climate-profile folds,0.6302454063305292,0.4652342554148646,0.21291458588623785
+loan_burden_direction,5605,fixed LogisticRegression C=0.1,E1 outer climate-profile folds,0.6323554059497621,0.46424777135747197,0.21186009626896024
+loan_omitted,5605,fixed LogisticRegression C=0.1,E1 outer climate-profile folds,0.6255844924151615,0.45431233266708,0.21353825661546538
+zero_meals_as_missing,5605,fixed LogisticRegression C=0.1,E1 outer climate-profile folds,0.6204723575665625,0.46031088354279753,0.21405496130904353
+zero_meal_households_excluded,5590,fixed LogisticRegression C=0.1,E1 outer climate-profile folds,0.6207896936511618,0.46219416212481235,0.2139766334457913
+flood_binary_omitted,5605,fixed LogisticRegression C=0.1,E1 outer climate-profile folds,0.6811543288795873,0.5439761681152833,0.20138397474909833
+flood_depth_omitted,5605,fixed LogisticRegression C=0.1,E1 outer climate-profile folds,0.6255439475146622,0.4535516842073576,0.21396384719971023
+equal_indicator_weights,5605,fixed LogisticRegression C=0.1,E1 outer climate-profile folds,0.6055815020122929,0.4440068319592716,0.21497552022856042
+robust_p01_p99_bounds,5605,fixed LogisticRegression C=0.1,E1 outer climate-profile folds,0.610607134420033,0.4499625523284858,0.21532925624100208

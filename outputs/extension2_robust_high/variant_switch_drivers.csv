@@ -1,0 +1,11 @@
+variant,n_scored,n_high,baseline_high_to_nonhigh,baseline_nonhigh_to_high,any_high_switch,switch_pct_of_scored
+equal_indicator_weights,5605,1868,299,299,598,10.669045495093666
+flood_binary_omitted,5605,1868,605,605,1210,21.587867975022302
+flood_depth_omitted,5605,1868,118,118,236,4.2105263157894735
+literacy_direction_reversed,5605,1868,343,343,686,12.23907225691347
+literacy_omitted,5605,1868,185,185,370,6.601248884924175
+loan_burden_direction,5605,1868,573,573,1146,20.446030330062445
+loan_omitted,5605,1868,301,301,602,10.740410347903657
+robust_p01_p99_bounds,5605,1868,209,209,418,7.4576271186440675
+zero_meal_households_excluded,5590,1863,0,5,5,0.08944543828264759
+zero_meals_as_missing,5605,1868,7,7,14,0.24977698483496877

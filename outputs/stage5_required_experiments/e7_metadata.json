@@ -1,0 +1,43 @@
+{
+  "experiment": "E7",
+  "status": "PARTIALLY_EXECUTED",
+  "versions": {
+    "python": "3.12.3",
+    "numpy": "2.5.3",
+    "pandas": "3.0.6",
+    "scipy": "1.18.1",
+    "scikit_learn": "1.9.1",
+    "xgboost": "3.4.1",
+    "random_seed": "42"
+  },
+  "executed_variants": [
+    "baseline_current",
+    "literacy_direction_reversed",
+    "literacy_omitted",
+    "loan_burden_direction",
+    "loan_omitted",
+    "zero_meals_as_missing",
+    "zero_meal_households_excluded",
+    "flood_binary_omitted",
+    "flood_depth_omitted",
+    "equal_indicator_weights",
+    "robust_p01_p99_bounds"
+  ],
+  "unresolved_variants": [
+    {
+      "specification": "verified literacy recode",
+      "status": "NOT_EXECUTABLE",
+      "missing_input": "questionnaire/codebook or raw literacy response categories"
+    },
+    {
+      "specification": "theoretical/fixed normalization bounds",
+      "status": "NOT_EXECUTABLE",
+      "missing_input": "prespecified defensible bounds"
+    },
+    {
+      "specification": "theory-derived alternative dimension weights",
+      "status": "NOT_EXECUTABLE",
+      "missing_input": "prespecified weights and justification"
+    }
+  ]
+}

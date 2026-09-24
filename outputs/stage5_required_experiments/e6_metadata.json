@@ -1,0 +1,17 @@
+{
+  "experiment": "E6",
+  "status": "EXECUTED",
+  "versions": {
+    "python": "3.12.3",
+    "numpy": "2.5.3",
+    "pandas": "3.0.6",
+    "scipy": "1.18.1",
+    "scikit_learn": "1.9.1",
+    "xgboost": "3.4.1",
+    "random_seed": "42"
+  },
+  "bootstrap_replicates_per_scheme": 100,
+  "consensus_subsample_n": 750,
+  "gower_hierarchical_subsample_n": 1500,
+  "note": "Gower average-linkage used; PAM unavailable in installed stack."
+}

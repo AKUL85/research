@@ -1,0 +1,4 @@
+row_index,surrogate_key,fingerprint_columns,fingerprint_payload,dataset
+0,SURROGATE_MISSING_HHID_388f6cc10e1e6aa7,a10;a11;a13;a14;a15;a23;hh_size;flood_affected;flood_depth_ft_mean,a10=1|a11=1|a13=1|a14=1|a15=1|a23=3|hh_size=3|flood_affected=1|flood_depth_ft_mean=0.666666666667,raw
+0,SURROGATE_MISSING_HHID_388f6cc10e1e6aa7,a10;a11;a13;a14;a15;a23;hh_size;flood_affected;flood_depth_ft_mean,a10=1|a11=1|a13=1|a14=1|a15=1|a23=3|hh_size=3|flood_affected=1|flood_depth_ft_mean=0.666666666667,stage1_lvi
+0,SURROGATE_MISSING_HHID_388f6cc10e1e6aa7,a10;a11;a13;a14;a15;a23;hh_size;flood_affected;flood_depth_ft_mean,a10=1|a11=1|a13=1|a14=1|a15=1|a23=3|hh_size=3|flood_affected=1|flood_depth_ft_mean=0.666666666667,stage2_cluster

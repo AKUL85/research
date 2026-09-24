@@ -1,0 +1,16 @@
+target,features,cv,model,n,p,accuracy,roc_auc
+High-LVI tertile,4 Exposure indicators (= 1/3 of target),stratified,LogReg,5605,4,0.7814451382694023,0.8522018371754417
+High-LVI tertile,4 Exposure indicators (= 1/3 of target),stratified,RandomForest,5605,4,0.7859054415700267,0.853601263824513
+High-LVI tertile,4 Exposure indicators (= 1/3 of target),stratified,XGBoost,5605,4,0.7860838537020517,0.8533186996863933
+High-LVI tertile,all 15 LVI components (= the target),stratified,LogReg,5605,15,0.9666369313113292,0.9970773771630301
+High-LVI tertile,all 15 LVI components (= the target),stratified,RandomForest,5605,15,0.9049063336306868,0.9660279833759173
+High-LVI tertile,all 15 LVI components (= the target),stratified,XGBoost,5605,15,0.9414808206958073,0.9884794052644457
+High socioeconomic-half tertile,exogenous climate/agri only,stratified,LogReg,5605,22,0.6715432649420161,0.6282235948289545
+High socioeconomic-half tertile,exogenous climate/agri only,stratified,RandomForest,5605,22,0.6820695807314897,0.6636661626113998
+High socioeconomic-half tertile,exogenous climate/agri only,stratified,XGBoost,5605,22,0.688135593220339,0.6656148165890147
+High socioeconomic-half tertile,exogenous climate/agri only,grouped,LogReg,5605,22,0.6694023193577163,0.6220194318175958
+High socioeconomic-half tertile,exogenous climate/agri only,grouped,RandomForest,5605,22,0.6667261373773417,0.6388988608045364
+High socioeconomic-half tertile,exogenous climate/agri only,grouped,XGBoost,5605,22,0.6690454950936664,0.6456290443559085
+High-LVI tertile,exogenous climate/agri only,grouped,LogReg,5605,22,0.6772524531668154,0.6205079106498531
+High-LVI tertile,exogenous climate/agri only,grouped,RandomForest,5605,22,0.6545941123996432,0.6564316611648433
+High-LVI tertile,exogenous climate/agri only,grouped,XGBoost,5605,22,0.6537020517395183,0.6579266367518748

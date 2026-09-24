@@ -1,0 +1,33 @@
+{
+  "outcome": "log of separate same-wave household monthly per-capita expenditure",
+  "analyzed_households": 5604,
+  "verified_districts": 64,
+  "cv": "five-fold GroupKFold on official Module A district code",
+  "models": [
+    "training_mean",
+    "lvi_only",
+    "demographic_baseline",
+    "demographic_plus_lvi",
+    "demographic_plus_robust_high"
+  ],
+  "ridge_alpha": 1.0,
+  "paired_district_mae_increments": {
+    "lvi_increment_vs_demographic": {
+      "mean_across_districts": -0.0023744922811066186,
+      "district_bootstrap_95pct_ci": [
+        -0.006062948716039698,
+        0.0014797481336618385
+      ],
+      "districts_improved": 44
+    },
+    "robust_increment_vs_demographic": {
+      "mean_across_districts": -0.0006546598425440755,
+      "district_bootstrap_95pct_ci": [
+        -0.002434870184011862,
+        0.001314218412623544
+      ],
+      "districts_improved": 38
+    }
+  },
+  "limits": "Same-wave criterion and held-out-district transfer only; archived full-sample LVI and robust labels are transductive, predictor timing and climate provenance are not verified, and no PSU/stratum design inference or later outcome is used."
+}

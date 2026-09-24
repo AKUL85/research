@@ -1,0 +1,30 @@
+# Extension 3: independent-outcome and location-transfer linking framework
+
+**Status update, 2026-09-24:** the X5/FIES branch below remains pending, but a public separate household expenditure aggregate and official district identifiers were obtained. The welfare branch was executed and is documented in `15_extension_welfare_results.md`. The local `hhid2` field proved misaligned and must not be used for direct joins.
+
+Date: 2026-09-24. Scope: Task 2.1. This is an executable data contract in prose; no source module has been joined and no validation result is asserted.
+
+## Selected design
+
+Use **BIHS Round 3 Module X5's eight past-12-month Food Insecurity Experience Scale (FIES) responses** as a separately measured outcome, then test transfer to **held-out verified survey locations/PSUs** from the same wave. This tests cross-sectional criterion association and geographic transfer only. The current cleaned index does not have a later-wave outcome or documented lead time, so this design cannot establish forecasting. IFPRI's [Round 3 release](https://bangladesh.ifpri.info/2021/06/bangladesh-integrated-household-survey-2018-19-third-round-dataset/) describes 5,604 households in 325 PSUs; the [survey questionnaire reproduced with Jubayer et al.](https://www.ebi.ac.uk/europepmc/webservices/rest/PMC10329118/supplementaryFiles) lists X5_01–X5_08, with Yes=1, No=2, Refused=3. [Jubayer et al.](https://doi.org/10.1016/j.heliyon.2023.e17378) analyzed FIES in this round. The X5 module is absent from the local 137-column cleaned file.
+
+The official Dataverse catalog for [Round 3](https://doi.org/10.7910/DVN/NXKLZJ) lists `009_bihs_r3_male_mod_a.tab` (file 4098252), `092_bihs_r3_female_mod_a.tab` (4098388), `111_bihs_r3_female_mod_x51.tab` (4097567), `112_bihs_r3_female_mod_x52.tab` (4097479), `158_r3_bihs_samplingweights.tab` (4367284), the codebooks, questionnaire, and readme. The x51/x52 split and exact field names must be verified in the female codebook before coding X5 items. Catalog listing is not evidence that these files have been accessed: downloads currently require a Dataverse guestbook response.
+
+## Required join and provenance contract
+
+1. Obtain the official Round 3 readme, male/female codebooks, both A identification modules, X5 files, sampling-weight file, and any documented household/PSU crosswalk. Record dataset version, file IDs, checksums, and access date. Use a researcher-provided guestbook response; do not invent one.
+2. Derive one official household key from the codebook, then verify its uniqueness and type in each file. Establish a documented mapping from local `hhid2` (and, if needed, `a10`–`a27`) to that official key. Do not fuzzy-match. Reconcile the unkeyed local row and the 5,605-versus-5,604 discrepancy **before** finalizing the analysis denominator. Preserve counts of matched, unmatched, duplicated, and split/changed household IDs.
+3. Join X5 items to the official household key one-to-one after collapsing any person-level rows by a documented respondent rule. Preserve item refusals and missing values. Prespecify an eligible-response rule; do not code Refused=3 as No. Derive an eight-item raw affirmative count only for complete responses, and use an officially supported Rasch-calibrated moderate/severe classification only if its scoring procedure and weights can be reproduced.
+4. Use the official PSU/location and stratum fields, plus design weights, from the identification and sampling files. Verify their meanings and uniqueness; the 39 repeated climate profiles are not substitutes. Partition by whole **verified** locations/PSUs, fixing the split before any outcome-driven model tuning. Report how many locations and households enter each partition and whether outcome prevalence changes by location.
+5. Record household interview date and X5 recall window. Trace each `clim_*` and crop-context variable to source dataset, spatial key, reference period, and merge code. Any predictor postdating the interview or overlapping a future test window must be excluded from a prediction analysis. For this same-wave criterion test, disclose contemporaneous measurement and avoid temporal claims.
+6. Audit selection and attrition: compare included versus unmatched households on available demographics and survey strata; use design weights for population-directed summaries only after mapping is verified. Keep an unweighted descriptive analysis separately identified if weights cannot be linked.
+
+## Predeclared comparisons once the contract is met
+
+- Primary criterion: complete-response X5 raw affirmative count (0–8), described as a survey response count rather than an automatically calibrated prevalence measure. A Rasch-based binary moderate/severe outcome may be added only with verified scoring documentation.
+- Compare held-out-location performance of (a) training-mean outcome baseline, (b) a minimal prespecified household-demographic baseline, (c) that baseline plus the continuous LVI, and (d) that baseline plus the strict robust-High flag. Any existing ML score must be evaluated on the same matched test households, without target ingredients entering a model for the constructed target. Report mean absolute error and squared error for the count, and paired incremental differences by location. If a valid binary FIES outcome is available, add AUROC, AUPRC, Brier score, calibration, and location-level uncertainty.
+- Recompute normalization and any LVI classification cutoff using training locations only, or explicitly label use of the frozen archived full-sample index as a transductive association check. The strict robust-High definition is a consensus over saved specifications; it is not tuned on X5.
+
+## Current execution boundary
+
+The local files contain no X5 items, verified official household key, verified PSU/stratum/weight mapping, or climate-source dates. The official X5 and design files are cataloged but inaccessible without the guestbook response. Therefore no honest matched denominator, held-out-location partition, FIES outcome, or independent-outcome performance statistic can be computed from the current workspace.

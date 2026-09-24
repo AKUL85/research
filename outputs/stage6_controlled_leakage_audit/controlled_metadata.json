@@ -1,0 +1,10 @@
+{
+  "target": "fixed archived full-sample socioeconomic upper tertile",
+  "target_cutoff": 0.4981217286755212,
+  "positive_n": 1868,
+  "score_reconstruction_max_abs_error": 2.220446049250313e-16,
+  "groups": 39,
+  "folds_per_split": 5,
+  "model": "median imputation, standardization, logistic regression C=1",
+  "interpretation": "diagnostic paired feature contrasts within each split; full-sample target/normalization make this unsuitable as an unbiased validation estimate"
+}

@@ -1,0 +1,27 @@
+{
+  "source": "outputs/stage5_required_experiments/e7_household_variant_scores.csv",
+  "definition": "Strict robust High is High in all 11 observed saved specifications; incomplete records are unclassified for strict robustness.",
+  "variant_count": 11,
+  "n_records": 5605,
+  "complete_cases": 5590,
+  "incomplete_cases": 15,
+  "strict_robust_high": 705,
+  "high_in_all_available": 708,
+  "incomplete_high_in_all_available": 3,
+  "never_high": 2543,
+  "switcher": 2354,
+  "baseline_high": 1868,
+  "baseline_high_not_strict_robust": 1163,
+  "any_baseline_switch": 2354,
+  "exactly_one_baseline_switch": 967,
+  "unique_switch_driver_counts": {
+    "flood_binary_omitted": 429,
+    "loan_burden_direction": 397,
+    "literacy_direction_reversed": 80,
+    "equal_indicator_weights": 32,
+    "robust_p01_p99_bounds": 24,
+    "flood_depth_omitted": 3,
+    "zero_meals_as_missing": 2
+  },
+  "caution": "Drivers are one-at-a-time contrasts to the baseline; correlated coding choices are not independent causes, and the set is not exhaustive or externally validated."
+}

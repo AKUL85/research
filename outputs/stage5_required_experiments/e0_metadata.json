@@ -1,0 +1,46 @@
+{
+  "experiment": "E0",
+  "status": "EXECUTED",
+  "versions": {
+    "python": "3.12.3",
+    "numpy": "2.5.3",
+    "pandas": "3.0.6",
+    "scipy": "1.18.1",
+    "scikit_learn": "1.9.1",
+    "xgboost": "3.4.1",
+    "random_seed": "42"
+  },
+  "surrogate_rule": "SHA-256 prefix over nine stable shared fields",
+  "summary": [
+    {
+      "left": "raw",
+      "right": "stage1_lvi",
+      "left_rows": 5605,
+      "right_rows": 5605,
+      "left_unique_keys": 5605,
+      "right_unique_keys": 5605,
+      "left_duplicate_keys": 0,
+      "right_duplicate_keys": 0,
+      "matched_keys": 5605,
+      "left_only_keys": 0,
+      "right_only_keys": 0,
+      "shared_columns_checked": 26,
+      "columns_with_mismatch": 0
+    },
+    {
+      "left": "stage1_lvi",
+      "right": "stage2_cluster",
+      "left_rows": 5605,
+      "right_rows": 5605,
+      "left_unique_keys": 5605,
+      "right_unique_keys": 5605,
+      "left_duplicate_keys": 0,
+      "right_duplicate_keys": 0,
+      "matched_keys": 5605,
+      "left_only_keys": 0,
+      "right_only_keys": 0,
+      "shared_columns_checked": 54,
+      "columns_with_mismatch": 0
+    }
+  ]
+}

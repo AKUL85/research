@@ -1,0 +1,44 @@
+{
+  "source": "e7_household_variant_scores.csv",
+  "interpretation": "Descriptive agreement among 11 chosen, correlated index specifications; not an uncertainty probability or a validated classification.",
+  "variant_count": 11,
+  "variants": [
+    "baseline_current",
+    "equal_indicator_weights",
+    "flood_binary_omitted",
+    "flood_depth_omitted",
+    "literacy_direction_reversed",
+    "literacy_omitted",
+    "loan_burden_direction",
+    "loan_omitted",
+    "robust_p01_p99_bounds",
+    "zero_meal_households_excluded",
+    "zero_meals_as_missing"
+  ],
+  "households": 5605,
+  "available_specifications_per_household": {
+    "10": 15,
+    "11": 5590
+  },
+  "baseline_high_n": 1868,
+  "always_high_n": 708,
+  "never_high_n": 2543,
+  "ambiguous_high_n": 2354,
+  "ambiguous_high_pct": 42.0,
+  "baseline_high_not_always_high_n": 1160,
+  "baseline_not_high_ever_high_n": 1194,
+  "high_vote_histogram": {
+    "0": 2543,
+    "1": 498,
+    "2": 314,
+    "3": 142,
+    "4": 137,
+    "5": 124,
+    "6": 63,
+    "7": 161,
+    "8": 169,
+    "9": 279,
+    "10": 470,
+    "11": 705
+  }
+}

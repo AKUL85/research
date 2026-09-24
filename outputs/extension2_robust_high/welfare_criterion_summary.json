@@ -1,0 +1,16 @@
+{
+  "outcome": "separate contemporaneous household monthly per-capita expenditure aggregate",
+  "source_link": "outputs/extension3_outcome_validation/public_welfare_link.csv",
+  "matched_outcome_n": 5604,
+  "missing_outcome_n": 1,
+  "district_count": 64,
+  "strict_robust_high_vs_never_high_log_mean_difference": -0.19481918844376978,
+  "district_bootstrap_95pct_ci": [
+    -0.27328830970607443,
+    -0.10771630064030559
+  ],
+  "geometric_mean_ratio": 0.8229834495222645,
+  "lvi_vs_log_expenditure_spearman": -0.12590615171497554,
+  "bootstrap_replicates": 2000,
+  "interpretation": "Cross-sectional criterion association only; index ingredients include income and meals, and expenditure is not a later hardship outcome. This is not external prediction, causal validation, or population inference."
+}

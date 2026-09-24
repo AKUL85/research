@@ -1,0 +1,43 @@
+{
+  "experiment": "E1",
+  "status": "EXECUTED",
+  "versions": {
+    "python": "3.12.3",
+    "numpy": "2.5.3",
+    "pandas": "3.0.6",
+    "scipy": "1.18.1",
+    "scikit_learn": "1.9.1",
+    "xgboost": "3.4.1",
+    "random_seed": "42"
+  },
+  "target": "outer-training-fold normalized socioeconomic-only high tertile",
+  "features": [
+    "clim_aus_rain_total_mm",
+    "clim_aman_rain_total_mm",
+    "clim_boro_rain_total_mm",
+    "clim_aus_solar_rad_avg",
+    "clim_aman_solar_rad_avg",
+    "clim_boro_solar_rad_avg",
+    "clim_aus_district_yield_ratio",
+    "clim_aman_district_yield_ratio",
+    "clim_boro_district_yield_ratio",
+    "mean_district_yield_ratio",
+    "clim_aus_district_area_ha",
+    "clim_aman_district_area_ha",
+    "clim_boro_district_area_ha",
+    "clim_aus_district_production_mt",
+    "clim_aman_district_production_mt",
+    "clim_boro_district_production_mt",
+    "mean_plot_temperature",
+    "max_plot_temperature",
+    "mean_plot_humidity",
+    "total_plot_rainfall",
+    "mean_plot_solar_rad",
+    "plot_distance_m_mean"
+  ],
+  "outer_cv": "5-fold StratifiedGroupKFold",
+  "inner_cv": "4-fold StratifiedGroupKFold",
+  "groups": 39,
+  "bootstrap_replicates": 1000,
+  "bootstrap_unit": "climate_profile"
+}

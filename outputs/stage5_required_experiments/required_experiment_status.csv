@@ -1,0 +1,8 @@
+experiment,requirement,status,reason
+E0,merge-integrity audit,EXECUTED,current files contain required keys and shared fields
+E1,nested spatial non-circular validation,EXECUTED,"current files contain target components, predictors, and 39 groups"
+E2,external-outcome validation,NOT_EXECUTABLE,no independent observed vulnerability outcome is present
+E3,temporal/longitudinal forecasting,NOT_EXECUTABLE,no later outcome or documented predictor-outcome time ordering is present
+E5,survey-design sensitivity,NOT_EXECUTABLE,"survey weights, strata, and PSU variables/documentation are absent"
+E6,cluster stability,EXECUTED,current normalized indicators and reconstructed climate-profile groups are sufficient
+E7,LVI specification sensitivity,PARTIALLY_EXECUTED,data-supported variants run; verified literacy and theoretical bounds require missing documentation

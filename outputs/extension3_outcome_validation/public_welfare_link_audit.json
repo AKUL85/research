@@ -1,0 +1,38 @@
+{
+  "public_archive": "https://reproducibility.worldbank.org/catalog/540",
+  "archive_doi": "10.60572/1z28-h024",
+  "underlying_dataset_doi": "10.7910/DVN/NXKLZJ",
+  "source_sha256": {
+    "identification": "3886d926383b6bd743f1caf58cfb5b1e3a282c9ed89f60fd6bd107279ca57ac0",
+    "weights": "cdb66df7d2f30057f5eaf76dd035e1250d540caf36992a8421cd6ef2a720d6b7",
+    "expenditure": "2a0edec54486e52d542d94affdcf475f293dbb1ad893701e34022ea867bebf6d"
+  },
+  "local_rows": 5605,
+  "official_sample_rows": 5605,
+  "direct_local_hhid2_equal_corrected": 0,
+  "local_hhid2_missing": 1,
+  "rowwise_checks": {
+    "hh_type": 5605,
+    "a10": 5605,
+    "a11": 5605,
+    "a13": 5605,
+    "a14": 5605,
+    "a15": 5605,
+    "a23": 5605,
+    "a24": 5605,
+    "a25": 5605,
+    "a26": 5605,
+    "a27": 5605,
+    "a16_1_mm": 5605,
+    "a16_1_yy": 5605,
+    "hh_size_vs_expenditure_hhsize": 5605
+  },
+  "district_count": 64,
+  "community_count": 275,
+  "expenditure_variable": "pcm1_fx_nfx_hrentq_uval",
+  "expenditure_nonmissing": 5604,
+  "expenditure_missing": 1,
+  "mapping_note": "All local rows align with the officially weighted identification sample sorted by numeric a01; received local hhid2 is independently misordered and must not be used for outcome joins. No source file was modified.",
+  "location_note": "district and community_id are from official Module A; neither is asserted to be the survey PSU without a codebook crosswalk.",
+  "outcome_note": "Archived separate household per-capita monthly expenditure aggregate, not a later outcome or FIES score."
+}
